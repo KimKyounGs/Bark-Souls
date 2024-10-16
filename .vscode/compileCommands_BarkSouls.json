@@ -1,0 +1,90 @@
+[
+	{
+		"file": "C:\\Users\\qkrgu\\Git\\Bark-Souls\\Source\\BarkSouls\\BTService_PlayerAssignifDetect.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\qkrgu\\Git\\Bark-Souls\\.vscode\\compileCommands_BarkSouls\\BarkSouls.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\qkrgu\\Git\\Bark-Souls\\Source\\BarkSouls\\BTService_PlayerAssignifDetect.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\qkrgu\\Git\\Bark-Souls\\.vscode\\compileCommands_BarkSouls\\BarkSouls.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\qkrgu\\Git\\Bark-Souls\\Source\\BarkSouls\\BarkSouls.Build.cs",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\qkrgu\\Git\\Bark-Souls\\.vscode\\compileCommands_BarkSouls\\BarkSouls.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\qkrgu\\Git\\Bark-Souls\\Source\\BarkSouls\\BarkSouls.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\qkrgu\\Git\\Bark-Souls\\.vscode\\compileCommands_BarkSouls\\BarkSouls.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\qkrgu\\Git\\Bark-Souls\\Source\\BarkSouls\\BarkSouls.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\qkrgu\\Git\\Bark-Souls\\.vscode\\compileCommands_BarkSouls\\BarkSouls.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\qkrgu\\Git\\Bark-Souls\\Source\\BarkSouls\\BarkSoulsCharacter.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\qkrgu\\Git\\Bark-Souls\\.vscode\\compileCommands_BarkSouls\\BarkSouls.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\qkrgu\\Git\\Bark-Souls\\Source\\BarkSouls\\BarkSoulsCharacter.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\qkrgu\\Git\\Bark-Souls\\.vscode\\compileCommands_BarkSouls\\BarkSouls.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\qkrgu\\Git\\Bark-Souls\\Source\\BarkSouls\\BarkSoulsGameMode.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\qkrgu\\Git\\Bark-Souls\\.vscode\\compileCommands_BarkSouls\\BarkSouls.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\qkrgu\\Git\\Bark-Souls\\Source\\BarkSouls\\BarkSoulsGameMode.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\qkrgu\\Git\\Bark-Souls\\.vscode\\compileCommands_BarkSouls\\BarkSouls.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\qkrgu\\Git\\Bark-Souls\\Source\\BarkSouls\\Base_AIController.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\qkrgu\\Git\\Bark-Souls\\.vscode\\compileCommands_BarkSouls\\BarkSouls.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\qkrgu\\Git\\Bark-Souls\\Source\\BarkSouls\\Base_AIController.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\qkrgu\\Git\\Bark-Souls\\.vscode\\compileCommands_BarkSouls\\BarkSouls.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.5\\Engine\\Source"
+	}
+]
