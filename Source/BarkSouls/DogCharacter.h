@@ -11,6 +11,8 @@ class BARKSOULS_API ADogCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	
+
 public:
 	// Sets default values for this character's properties
 	ADogCharacter();
@@ -27,7 +29,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-	//Input
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Enhanced Input")
 	class UInputMappingContext* DefaultMappingContext;
 
@@ -35,7 +36,7 @@ protected:
 	class UInputAction* InputToMove;	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
-	class UInputAction* InputToLook;	
+	class UInputAction* InputToLook;
 
 	void EnhancedInputMove(const FInputActionValue& Value);
 	void EnhancedInputLook(const FInputActionValue& Value);
