@@ -2,6 +2,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
+#include "GameFramework/SpringArmComponent.h"
+#include <Camera/CameraComponent.h>
 
 #include "DogCharacter.h"
 
@@ -25,6 +27,17 @@ ADogCharacter::ADogCharacter()
 	if(InputActionLook.Succeeded()){
 		InputToLook = InputActionLook.Object;
 	}
+
+	//springArm
+	springArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
+	springArmComp->SetupAttachment(RootComponent);
+		// 차후 값 수정
+	springArmComp->SetRelativeLocation(FVector(0, 0, 0)); 
+	springArmComp->TargetArmLength = 200;
+
+	//Camera
+	cameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
+	cameraComp->SetupAttachment(springArmComp);
 
 }
 
