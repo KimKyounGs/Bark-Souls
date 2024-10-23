@@ -28,7 +28,7 @@ void UBTService_PlayerAssignifDetect::TickNode(UBehaviorTreeComponent &OwnerComp
     float Player_Distance = UKismetMathLibrary::Vector_Distance(Player->GetActorLocation(),Owner->GetActorLocation());
 
 
-    if(AIController->LineOfSightTo(Player) && Distance >= Player_Distance) //Player가 보이고 Player와 AI 사이의 거리가 설정한 값 이하면 블랙보드 오브젝트값 할당
+    if(AIController->LineOfSightTo(Player) && Distance >= Player_Distance && Player_Distance >= 500) //Player가 보이고 Player와 AI 사이의 거리가 설정한 값 이하면 블랙보드 오브젝트값 할당
     { 
         OwnerComp.GetBlackboardComponent()->SetValueAsObject(GetSelectedBlackboardKey(),Player);
     }
