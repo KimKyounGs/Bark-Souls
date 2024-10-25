@@ -32,7 +32,7 @@ ADogCharacter::ADogCharacter()
 	springArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	springArmComp->SetupAttachment(RootComponent);
 		// 차후 값 수정
-	springArmComp->SetRelativeLocation(FVector(0, 0, 0)); 
+	springArmComp->SetRelativeLocation(FVector(0, 30, 0)); 
 	springArmComp->TargetArmLength = 200;
 
 	//Camera
@@ -54,6 +54,8 @@ void ADogCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+	InputToMove->Triggers.Add(RollTrigger);
+	InputToMove->Triggers.Add(RunTrigger);
 	
 }
 
@@ -64,7 +66,7 @@ void ADogCharacter::Tick(float DeltaTime)
 
 }
 
-// Called to bind functionality to input
+// Called to bind functionality to input(Override)
 void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -78,6 +80,9 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 	FVector2D MovementVector = Value.Get<FVector2D>();
+	UE_LOG(LogTemp, Display, TEXT("Value = %s"), *MovementVector.ToString()); //trigger 출력
+	//트리거 출력 결과 -> Tab : 0, 0	Hold : +1, 0
+	//WASD 입력중에 spacebar를 입력하는 경우 -> 현재 입력되고 있는 Vector의 x값이 무조건 1로 변함
 
 	if (Controller != nullptr)
 	{
@@ -90,8 +95,8 @@ void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y);
-		AddMovementInput(RightDirection, MovementVector.X);
+		AddMovementInput(ForwardDirection, MovementVector.Y*0.5);
+		AddMovementInput(RightDirection, MovementVector.X*0.5);
 	}
 }
 
