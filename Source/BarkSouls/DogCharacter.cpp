@@ -27,6 +27,10 @@ ADogCharacter::ADogCharacter()
 	if(InputActionLook.Succeeded()){
 		InputToLook = InputActionLook.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionRun(TEXT("/Game/Kwanik/Input/IA_RunAndRoll.IA_RunAndRoll"));
+	if(InputActionRun.Succeeded()){
+		InputToRun = InputActionRun.Object;
+	}
 
 	//springArm
 	springArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
@@ -54,8 +58,8 @@ void ADogCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-	InputToMove->Triggers.Add(RollTrigger);
-	InputToMove->Triggers.Add(RunTrigger);
+	InputToRun->Triggers.Add(RollTrigger);
+	InputToRun->Triggers.Add(RunTrigger);
 	
 }
 
@@ -74,6 +78,7 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	if(EnhancedInputComponent != nullptr){
 		EnhancedInputComponent->BindAction(InputToMove, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputMove);
 		EnhancedInputComponent->BindAction(InputToLook, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputLook);
+		EnhancedInputComponent->BindAction(InputToRun, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputRun);
 	}
 
 }
@@ -108,4 +113,11 @@ void ADogCharacter::EnhancedInputLook(const FInputActionValue& Value){
 		AddControllerPitchInput(LookVector.Y);
 	}
 	
+}
+void ADogCharacter::EnhancedInputRun(const FInputActionValue& Value){
+	//bool 변수 변화를 주고
+	//EnhancedInputMove에 넘겨주기
+
+	//그리고 길게 눌렸을때는
+	//Roll 애니메이션 재생해야지 뭐
 }

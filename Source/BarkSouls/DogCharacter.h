@@ -47,6 +47,9 @@ protected:
 	class UInputAction* InputToLook;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
+	class UInputAction* InputToRun;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
 	class UInputTriggerHold* RunTrigger;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
@@ -54,4 +57,5 @@ protected:
 
 	void EnhancedInputMove(const FInputActionValue& Value);
 	void EnhancedInputLook(const FInputActionValue& Value);
+	void EnhancedInputRun(const FInputActionValue& Value);
 };
