@@ -85,7 +85,7 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 	FVector2D MovementVector = Value.Get<FVector2D>();
-	UE_LOG(LogTemp, Display, TEXT("Value = %s"), *MovementVector.ToString()); //trigger 출력
+	
 	//트리거 출력 결과 -> Tab : 0, 0	Hold : +1, 0
 	//WASD 입력중에 spacebar를 입력하는 경우 -> 현재 입력되고 있는 Vector의 x값이 무조건 1로 변함
 
@@ -115,9 +115,21 @@ void ADogCharacter::EnhancedInputLook(const FInputActionValue& Value){
 	
 }
 void ADogCharacter::EnhancedInputRun(const FInputActionValue& Value){
+	bool bIsTriggered = Value.Get<bool>();
+	UE_LOG(LogTemp, Display, TEXT("Value = %s"), bIsTriggered ? TEXT("true") : TEXT("false")); //trigger 출력
 	//bool 변수 변화를 주고
 	//EnhancedInputMove에 넘겨주기
+	//FVector CurrentVelocity = GetVelocity();
+	//UE_LOG(LogTemp, Display, TEXT("Current = %s"), *CurrentVelocity.ToString()); 
+	
+	//FRotator ControlRotation = Controller ? Controller->GetControlRotation() : FRotator::ZeroRotator; 
+	//FRotator YawRotation(0, ControlRotation.Yaw, 0);
+	//const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
+	//FVector LaunchVelocity = ForwardDirection * 5;
+	//AddMovementInput(LaunchVelocity.GetSafeNormal(), 1000.0f);
+	//UE_LOG(LogTemp, Display, TEXT("Launch = %s"), *LaunchVelocity.ToString()); 
+	
 	//그리고 길게 눌렸을때는
 	//Roll 애니메이션 재생해야지 뭐
 }
