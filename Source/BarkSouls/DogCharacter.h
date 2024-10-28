@@ -30,11 +30,26 @@ public:
 
 
 public:
+
+	bool bAttacking;
+
 	UPROPERTY(VisibleAnywhere, Category=Camera)
 	class USpringArmComponent* springArmComp;
 
 	UPROPERTY(VisibleAnywhere, Category=Camera)
 	class UCameraComponent* cameraComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Animation")
+	class UAnimMontage* AttackMontage;
+
+	UFUNCTION(BlueprintCallable)
+	void AttackDown();
+
+	UFUNCTION(BlueprintCallable)
+	void AttackUp();
+
+	UFUNCTION(BlueprintCallable)
+	void AttackEnd();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Enhanced Input")

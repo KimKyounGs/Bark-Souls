@@ -10,6 +10,7 @@
 // Sets default values
 ADogCharacter::ADogCharacter()
 {
+	bAttacking = false;
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -74,6 +75,9 @@ void ADogCharacter::Tick(float DeltaTime)
 void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAction("Key1", IE_Pressed, this, &ADogCharacter::AttackDown);
+	PlayerInputComponent->BindAction("Key1", IE_Released, this, &ADogCharacter::AttackUp);
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	if(EnhancedInputComponent != nullptr){
 		EnhancedInputComponent->BindAction(InputToMove, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputMove);
@@ -100,8 +104,8 @@ void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y*0.5);
-		AddMovementInput(RightDirection, MovementVector.X*0.5);
+		AddMovementInput(ForwardDirection, MovementVector.Y*0.1);
+		AddMovementInput(RightDirection, MovementVector.X*0.1);
 	}
 }
 
@@ -132,4 +136,22 @@ void ADogCharacter::EnhancedInputRun(const FInputActionValue& Value){
 	
 	//그리고 길게 눌렸을때는
 	//Roll 애니메이션 재생해야지 뭐
+}
+void ADogCharacter::AttackDown()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(!AnimInstance) return;
+
+	if(!AnimInstance->Montage_IsPlaying(NULL) && !bAttacking){
+		AnimInstance->Montage_Play(AttackMontage, 1.5f);
+		AnimInstance->Montage_JumpToSection("Attack1", AttackMontage);
+	}
+}
+void ADogCharacter::AttackUp()
+{
+	bAttacking=false;
+}
+void ADogCharacter::AttackEnd()
+{
+	bAttacking=false;
 }
