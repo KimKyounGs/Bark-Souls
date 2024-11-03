@@ -18,6 +18,7 @@ void ABase_AIController::BeginPlay()
     {
         RunBehaviorTree(BehaviorTree);
         GetBlackboardComponent()->SetValueAsVector(TEXT("StartLocation"),GetPawn()->GetActorLocation());
+        GetBlackboardComponent()->SetValueAsObject(TEXT("Player"),UGameplayStatics::GetPlayerPawn(GetWorld(),0));
     }
 
 

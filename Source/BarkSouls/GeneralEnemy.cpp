@@ -3,11 +3,14 @@
 
 #include "GeneralEnemy.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "AttackTokenComponent.h"
+
 
 AGeneralEnemy::AGeneralEnemy()
 {
     GetCharacterMovement()->GetNavMovementProperties()->bUseAccelerationForPaths = true;
     GetCharacterMovement()->MaxWalkSpeed = 400.f;
+    AttackTokenComponent = CreateDefaultSubobject<UAttackTokenComponent>(TEXT("AttackTokenComponent"));
 }
 
 APatrolRoute *AGeneralEnemy::GetPatrolRoute() const
@@ -31,4 +34,10 @@ void AGeneralEnemy::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
 
+}
+
+void AGeneralEnemy::Attack()
+{
+    PlayAnimMontage(AttackAnim);
+    UE_LOG(LogTemp, Warning, TEXT("Attack"));
 }

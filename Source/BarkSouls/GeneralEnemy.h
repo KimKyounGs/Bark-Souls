@@ -8,6 +8,8 @@
 #include "GeneralEnemy.generated.h"
 
 class APatrolRoute;
+class UAttackTokenComponent;
+class UAnimMontage;
 
 UCLASS()
 class BARKSOULS_API AGeneralEnemy : public AEnemyBase, public IGeneralEnemyAII
@@ -19,11 +21,21 @@ class BARKSOULS_API AGeneralEnemy : public AEnemyBase, public IGeneralEnemyAII
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="AI",  meta = (AllowPrivateAccess = "true"))
     APatrolRoute* PatrolPath;
+
+	UPROPERTY(BlueprintReadWrite, Category="Attack", meta = (AllowPrivateAccess = "true"))
+	UAttackTokenComponent* AttackTokenComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack, meta = (AllowprivateAccess = "true"))
+	UAnimMontage* AttackAnim;
+
 public:
 	AGeneralEnemy();
 
 	UFUNCTION(BlueprintCallable, Category = "AI")
 	virtual APatrolRoute* GetPatrolRoute() const override;
+
+	UFUNCTION(Category = "Combat")
+	virtual void Attack();
 	
 protected:
 	virtual void BeginPlay() override;

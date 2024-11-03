@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "Base_AIController.generated.h"
-
 /**
  * 
  */
