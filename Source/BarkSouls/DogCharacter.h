@@ -39,11 +39,10 @@ public:
 	UPROPERTY(VisibleAnywhere, Category=Camera)
 	class UCameraComponent* cameraComp;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Animation")
-	//class UAnimMontage* AttackMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
+	class UAnimMontage* AttackMontage;
 
-	UFUNCTION(BlueprintPure)
-	bool IsAttack() const;
+	void PressAtk();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Enhanced Input")
@@ -70,5 +69,5 @@ protected:
 	void EnhancedInputMove(const FInputActionValue& Value);
 	void EnhancedInputLook(const FInputActionValue& Value);
 	void EnhancedInputRun(const FInputActionValue& Value);
-	void EnhancedInputFight();
+	void EnhancedInputFight(const FInputActionValue& Value);
 };

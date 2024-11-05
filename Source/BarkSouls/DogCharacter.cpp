@@ -35,8 +35,9 @@ ADogCharacter::ADogCharacter()
 
 	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionFight(TEXT("/Game/Kwanik/Input/IA_Fight.IA_Fight"));
 	if(InputActionRun.Succeeded()){
-		InputToRun = InputActionFight.Object;
+		InputToFight = InputActionFight.Object;
 	}
+	
 
 	//springArm
 	springArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
@@ -64,8 +65,7 @@ void ADogCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-	//InputToRun->Triggers.Add(RollTrigger);
-	//InputToRun->Triggers.Add(RunTrigger);
+	
 	
 }
 
@@ -81,8 +81,6 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	//PlayerInputComponent->BindAction("Key1", IE_Pressed, this, &ADogCharacter::AttackDown);
-	//PlayerInputComponent->BindAction("Key1", IE_Released, this, &ADogCharacter::AttackUp);
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	if(EnhancedInputComponent != nullptr){
 		EnhancedInputComponent->BindAction(InputToMove, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputMove);
@@ -124,9 +122,17 @@ void ADogCharacter::EnhancedInputLook(const FInputActionValue& Value){
 	}
 	
 }
+//공격 모션 12번째 트라이
+void ADogCharacter::EnhancedInputFight(const FInputActionValue& Value){
+	bool v = Value.Get<bool>();
 
-void ADogCharacter::EnhancedInputFight(){
-	bAttacking = true;
+	PressAtk();
+}
+
+void ADogCharacter::PressAtk()
+{
+	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+	animInstance->Montage_Play(AttackMontage);
 }
 
 //void ADogCharacter::EnhancedInputRun(const FInputActionValue& Value){
@@ -148,7 +154,3 @@ void ADogCharacter::EnhancedInputFight(){
 	//그리고 길게 눌렸을때는
 	//Roll 애니메이션 재생해야지 뭐
 //}
-bool ADogCharacter::IsAttack() const
-{
-	return bAttacking;
-}
