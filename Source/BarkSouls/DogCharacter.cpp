@@ -28,13 +28,13 @@ ADogCharacter::ADogCharacter()
 	if(InputActionLook.Succeeded()){
 		InputToLook = InputActionLook.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionRun(TEXT("/Game/Kwanik/Input/IA_RunAndRoll.IA_RunAndRoll"));
-	if(InputActionRun.Succeeded()){
-		InputToRun = InputActionRun.Object;
+	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionRoll(TEXT("/Game/Kwanik/Input/IA_RunAndRoll.IA_RunAndRoll"));
+	if(InputActionRoll.Succeeded()){
+		InputToRoll = InputActionRoll.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionFight(TEXT("/Game/Kwanik/Input/IA_Fight.IA_Fight"));
-	if(InputActionRun.Succeeded()){
+	if(InputActionFight.Succeeded()){
 		InputToFight = InputActionFight.Object;
 	}
 	
@@ -85,7 +85,7 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	if(EnhancedInputComponent != nullptr){
 		EnhancedInputComponent->BindAction(InputToMove, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputMove);
 		EnhancedInputComponent->BindAction(InputToLook, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputLook);
-		//EnhancedInputComponent->BindAction(InputToRun, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputRun);
+		EnhancedInputComponent->BindAction(InputToRoll, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputRoll);
 		EnhancedInputComponent->BindAction(InputToFight, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputFight);
 	}
 
@@ -135,22 +135,13 @@ void ADogCharacter::PressAtk()
 	animInstance->Montage_Play(AttackMontage);
 }
 
-//void ADogCharacter::EnhancedInputRun(const FInputActionValue& Value){
-	//bool bIsTriggered = Value.Get<bool>();
-	//UE_LOG(LogTemp, Display, TEXT("Value = %s"), bIsTriggered ? TEXT("true") : TEXT("false")); //trigger 출력
-	//bool 변수 변화를 주고
-	//EnhancedInputMove에 넘겨주기
-	//FVector CurrentVelocity = GetVelocity();
-	//UE_LOG(LogTemp, Display, TEXT("Current = %s"), *CurrentVelocity.ToString()); 
-	
-	//FRotator ControlRotation = Controller ? Controller->GetControlRotation() : FRotator::ZeroRotator; 
-	//FRotator YawRotation(0, ControlRotation.Yaw, 0);
-	//const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+void ADogCharacter::EnhancedInputRoll(const FInputActionValue& Value){
+	FVector CurrentVelocity = GetVelocity(); //ACharacter 함수
 
-	//FVector LaunchVelocity = ForwardDirection * 5;
-	//AddMovementInput(LaunchVelocity.GetSafeNormal(), 1000.0f);
-	//UE_LOG(LogTemp, Display, TEXT("Launch = %s"), *LaunchVelocity.ToString()); 
-	
-	//그리고 길게 눌렸을때는
-	//Roll 애니메이션 재생해야지 뭐
-//}
+	if(CurrentVelocity.Size()){
+		LaunchCharacter(CurrentVelocity*5, false, false);
+	}
+	else { //제자리에서 깡총깡총
+		LaunchCharacter(FVector(0, -10, 0), true, false);
+	}
+}

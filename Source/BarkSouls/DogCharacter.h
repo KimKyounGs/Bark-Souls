@@ -55,7 +55,7 @@ protected:
 	class UInputAction* InputToLook;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
-	class UInputAction* InputToRun;
+	class UInputAction* InputToRoll;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
 	class UInputAction* InputToFight;
@@ -68,6 +68,6 @@ protected:
 
 	void EnhancedInputMove(const FInputActionValue& Value);
 	void EnhancedInputLook(const FInputActionValue& Value);
-	void EnhancedInputRun(const FInputActionValue& Value);
+	void EnhancedInputRoll(const FInputActionValue& Value);
 	void EnhancedInputFight(const FInputActionValue& Value);
 };
