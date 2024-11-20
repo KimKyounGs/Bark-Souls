@@ -284,6 +284,7 @@
 /I "C:\Program Files\Epic Games\UE_5.5\Engine\Intermediate\Build\Win64\UnrealEditor\Inc\AssetTools\UHT" 
 /I "C:\Program Files\Epic Games\UE_5.5\Engine\Intermediate\Build\Win64\UnrealEditor\Inc\AssetTools\VNI" 
 /I "C:\Program Files\Epic Games\UE_5.5\Engine\Source\Developer\AssetTools\Public" 
+/I "C:\Program Files\Epic Games\UE_5.5\Engine\Source\Developer\AssetTools\Internal" 
 /I "C:\Program Files\Epic Games\UE_5.5\Engine\Intermediate\Build\Win64\UnrealEditor\Inc\AssetDefinition\UHT" 
 /I "C:\Program Files\Epic Games\UE_5.5\Engine\Intermediate\Build\Win64\UnrealEditor\Inc\AssetDefinition\VNI" 
 /I "C:\Program Files\Epic Games\UE_5.5\Engine\Source\Editor\AssetDefinition\Public" 

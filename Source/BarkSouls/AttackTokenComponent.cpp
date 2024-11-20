@@ -2,6 +2,8 @@
 #include "AttackTokenComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "BarkSoulsCharacter.h"
+#include "Base_AIController.h"
+
 
 //플레이어라면 AttackToken을 보유하게하고 Enemy가 공격시 플레이어의 AttackToken을 할당해주고 공격이 끝나면 반환한다 -> 그럼 플레이어가 처음 보유한 AttackToken의 수만큼의 Enemy만 한번에 공격가능 
 
@@ -38,24 +40,48 @@ void UAttackTokenComponent::BeginPlay()
 void UAttackTokenComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if(AttackReserveList.Num() > 0)
+	{
+		for (ABase_AIController* Element : AttackReserveList)
+    	{
+        	// Unreal Engine의 로그 시스템을 사용하여 콘솔에 출력
+        	UE_LOG(LogTemp, Warning, TEXT("Array Element: %s"), *Element->GetName());
+    	}
+	}
 
 	// ...
 }
 
 void UAttackTokenComponent::ReturnAttackToken()
 {
+	AttackReserveList.RemoveAt(0);
 	AttackTokenCount += 1;
+
+	if(AttackReserveList.Num() > 0)
+	{ 
+		AttackTokenCount -= 1;
+		AttackReserveList[0]->ChangeStateAttack();
+	}
 }
 
-bool UAttackTokenComponent::ReserveAttackToken()
+bool UAttackTokenComponent::ReserveAttackToken(ABase_AIController* Target)
 {
+	AttackReserveList.Add(Target);
+	UE_LOG(LogTemp, Warning, TEXT("Name : %s"), *Target->GetName());
 	if(AttackTokenCount > 0)
+	{
+		AttackTokenCount -= 1;
+		Target->ChangeStateAttack();
+	}
+	return true;
+	/*if(AttackTokenCount > 0)
 	{
 		AttackTokenCount -= 1;
 		return true;
 	}
 	else
 	{
+		
 		return false;
-	}
+	}*/
 }

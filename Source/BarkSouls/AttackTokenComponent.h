@@ -7,6 +7,8 @@
 #include "AttackTokenComponent.generated.h"
 
 
+class ABase_AIController;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BARKSOULS_API UAttackTokenComponent : public UActorComponent
 {
@@ -18,6 +20,8 @@ class BARKSOULS_API UAttackTokenComponent : public UActorComponent
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	int StartAttackCount = 1;
 
+	UPROPERTY()
+	TArray<ABase_AIController*> AttackReserveList;
 public:	
 	// Sets default values for this component's properties
 	UAttackTokenComponent();
@@ -34,6 +38,6 @@ public:
 	void ReturnAttackToken();
 
 	UFUNCTION()
-	bool ReserveAttackToken();
+	bool ReserveAttackToken(ABase_AIController* Target);
 		
 };

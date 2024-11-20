@@ -4,6 +4,7 @@
 #include "Navigation/PathFollowingComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GeneralEnemy.h"
+#include "AIBehaviorComponent.h"
 
 UBTT_KnightAttack::UBTT_KnightAttack()
 {
@@ -29,7 +30,7 @@ EBTNodeResult::Type UBTT_KnightAttack::ExecuteTask(UBehaviorTreeComponent &Owner
     AActor* AttackTarget = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(GetSelectedBlackboardKey()));
 
     MoveReq.SetGoalActor(AttackTarget);
-    MoveReq.SetAcceptanceRadius(80.f);
+    MoveReq.SetAcceptanceRadius(50.f);
 
     const FPathFollowingRequestResult MoveResult = (OwnerComp.GetAIOwner())->MoveTo(MoveReq);
     if(EPathFollowingRequestResult::AlreadyAtGoal == MoveResult.Code)
@@ -40,6 +41,9 @@ EBTNodeResult::Type UBTT_KnightAttack::ExecuteTask(UBehaviorTreeComponent &Owner
             return EBTNodeResult::Failed;
         }
         Enemy->Attack();
+        OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("HasAttackToken"),false);
+        OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("RegisterAttackList"),false);
+        OwnerComp.GetBlackboardComponent()->SetValueAsEnum(TEXT("State"), static_cast<uint8>(EAIStateType::AttackIdle));
     }
 
     return EBTNodeResult::Succeeded;

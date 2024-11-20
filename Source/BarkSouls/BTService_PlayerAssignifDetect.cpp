@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "BTService_PlayerAssignifDetect.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -8,6 +7,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIBehaviorComponent.h"
 #include "AttackTokenComponent.h"
+#include "Base_AIController.h"
 
 UBTService_PlayerAssignifDetect::UBTService_PlayerAssignifDetect()
 {
@@ -35,12 +35,17 @@ void UBTService_PlayerAssignifDetect::TickNode(UBehaviorTreeComponent &OwnerComp
         OwnerComp.GetBlackboardComponent()->SetValueAsEnum(GetSelectedBlackboardKey(),static_cast<uint8>(EAIStateType::Chase)); //uint8을 원하므로 static_cast를 통해서 업캐스팅
         //OwnerComp.GetBlackboardComponent()->SetValueAsObject(GetSelectedBlackboardKey(),Player);
     }
-    else if(Player_Distance <= 500)
+    else if(Player_Distance <= 500 
+    && OwnerComp.GetBlackboardComponent()->GetValueAsEnum(TEXT("State")) != static_cast<uint8>(EAIStateType::AttackStart) &&
+    !OwnerComp.GetBlackboardComponent()->GetValueAsBool(TEXT("RegisterAttackList")))
     {
         if(UAttackTokenComponent* AttackTokenComponent = Cast<UAttackTokenComponent>(Player->GetComponentByClass(UAttackTokenComponent::StaticClass())))
         {
-            bool HasAttackToken = OwnerComp.GetBlackboardComponent()->GetValueAsBool(TEXT("HasAttackToken"));
-            if(AttackTokenComponent->ReserveAttackToken() || HasAttackToken)
+            ABase_AIController* Base_Controller = Cast<ABase_AIController>(AIController);
+            AttackTokenComponent->ReserveAttackToken(Base_Controller);
+            OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("RegisterAttackList"),true);
+            /*bool HasAttackToken = OwnerComp.GetBlackboardComponent()->GetValueAsBool(TEXT("HasAttackToken"));
+            if(AttackTokenComponent->ReserveAttackToken()|| HasAttackToken)                                
             {
                 OwnerComp.GetBlackboardComponent()->SetValueAsEnum(GetSelectedBlackboardKey(), static_cast<uint8>(EAIStateType::AttackStart));
                 OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("HasAttackToken"),true);
@@ -48,7 +53,7 @@ void UBTService_PlayerAssignifDetect::TickNode(UBehaviorTreeComponent &OwnerComp
             else
             {
                 OwnerComp.GetBlackboardComponent()->SetValueAsEnum(GetSelectedBlackboardKey(),static_cast<uint8>(EAIStateType::AttackIdle));
-            }
+            }*/
         }
         else
         {
@@ -57,9 +62,19 @@ void UBTService_PlayerAssignifDetect::TickNode(UBehaviorTreeComponent &OwnerComp
 
         //OwnerComp.GetBlackboardComponent()->ClearValue(GetSelectedBlackboardKey());   
     }
+    else if(Player_Distance <= 500 && 
+    OwnerComp.GetBlackboardComponent()->GetValueAsBool(TEXT("RegisterAttackList")) && 
+    OwnerComp.GetBlackboardComponent()->GetValueAsEnum(TEXT("State")) != static_cast<uint8>(EAIStateType::AttackStart))
+    {
+        OwnerComp.GetBlackboardComponent()->SetValueAsEnum(TEXT("State"),static_cast<uint8>(EAIStateType::AttackIdle));
+    }
     else
     {
-        OwnerComp.GetBlackboardComponent()->SetValueAsEnum(GetSelectedBlackboardKey(),static_cast<uint8>(EAIStateType::Idle));
+        if(Player_Distance >= 500)
+        {
+            OwnerComp.GetBlackboardComponent()->SetValueAsEnum(GetSelectedBlackboardKey(),static_cast<uint8>(EAIStateType::Idle));
+        }
+        
     }
     //UE_LOG(LogTemp, Warning, TEXT("%s"), *);
 }

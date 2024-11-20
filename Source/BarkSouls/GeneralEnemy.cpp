@@ -4,6 +4,7 @@
 #include "GeneralEnemy.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AttackTokenComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 AGeneralEnemy::AGeneralEnemy()
@@ -38,6 +39,9 @@ void AGeneralEnemy::Tick(float DeltaTime)
 
 void AGeneralEnemy::Attack()
 {
+    
     PlayAnimMontage(AttackAnim);
-    UE_LOG(LogTemp, Warning, TEXT("Attack"));
+    APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(),0);
+    UAttackTokenComponent* PlayerAttackTokenComponent = Cast<UAttackTokenComponent>(Player->GetComponentByClass(UAttackTokenComponent::StaticClass()));
+    PlayerAttackTokenComponent->ReturnAttackToken();
 }
