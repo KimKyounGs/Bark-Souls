@@ -132,6 +132,9 @@ void ADogCharacter::EnhancedInputFight(const FInputActionValue& Value){
 void ADogCharacter::PressAtk()
 {
 	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+	if(animInstance->IsAnyMontagePlaying()){
+		return; //이미 공격중에는 연속 입력이 안되기 위함 
+	}
 	animInstance->Montage_Play(AttackMontage);
 }
 
