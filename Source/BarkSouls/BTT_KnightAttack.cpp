@@ -30,7 +30,7 @@ EBTNodeResult::Type UBTT_KnightAttack::ExecuteTask(UBehaviorTreeComponent &Owner
     AActor* AttackTarget = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(GetSelectedBlackboardKey()));
 
     MoveReq.SetGoalActor(AttackTarget);
-    MoveReq.SetAcceptanceRadius(50.f);
+    MoveReq.SetAcceptanceRadius(100.f);
 
     const FPathFollowingRequestResult MoveResult = (OwnerComp.GetAIOwner())->MoveTo(MoveReq);
     if(EPathFollowingRequestResult::AlreadyAtGoal == MoveResult.Code)
