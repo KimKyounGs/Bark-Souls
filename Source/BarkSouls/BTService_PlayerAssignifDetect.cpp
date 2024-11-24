@@ -43,6 +43,10 @@ void UBTService_PlayerAssignifDetect::TickNode(UBehaviorTreeComponent &OwnerComp
         {
             ABase_AIController* Base_Controller = Cast<ABase_AIController>(AIController);
             AttackTokenComponent->ReserveAttackToken(Base_Controller);
+            if(UAttackTokenComponent* AttackTokenComponentOwn = Cast<UAttackTokenComponent>(Owner->GetComponentByClass(UAttackTokenComponent::StaticClass())))
+            {
+                AttackTokenComponentOwn->IsAttackReady = true;
+            }
             OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("RegisterAttackList"),true);
             /*bool HasAttackToken = OwnerComp.GetBlackboardComponent()->GetValueAsBool(TEXT("HasAttackToken"));
             if(AttackTokenComponent->ReserveAttackToken()|| HasAttackToken)                                

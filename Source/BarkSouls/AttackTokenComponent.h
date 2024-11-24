@@ -22,9 +22,11 @@ class BARKSOULS_API UAttackTokenComponent : public UActorComponent
 
 	UPROPERTY()
 	TArray<ABase_AIController*> AttackReserveList;
+
 public:	
 	// Sets default values for this component's properties
 	UAttackTokenComponent();
+
 
 protected:
 	// Called when the game starts
@@ -39,5 +41,8 @@ public:
 
 	UFUNCTION()
 	bool ReserveAttackToken(ABase_AIController* Target);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool IsAttackReady = false;
 		
 };

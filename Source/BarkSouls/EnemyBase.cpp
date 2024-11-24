@@ -2,6 +2,7 @@
 
 
 #include "EnemyBase.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AEnemyBase::AEnemyBase()
@@ -31,4 +32,9 @@ void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
+
+void AEnemyBase::SetMovementSpeed(float Speed)
+{
+	GetCharacterMovement()->MaxWalkSpeed = Speed;
+} 
 

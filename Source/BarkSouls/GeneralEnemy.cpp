@@ -36,12 +36,18 @@ void AGeneralEnemy::Tick(float DeltaTime)
 
 
 }
-
-void AGeneralEnemy::Attack()
+void AGeneralEnemy::OnAttackEnded()
 {
-    
-    PlayAnimMontage(AttackAnim);
+    GetCharacterMovement()->MaxWalkSpeed = 100;
     APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(),0);
     UAttackTokenComponent* PlayerAttackTokenComponent = Cast<UAttackTokenComponent>(Player->GetComponentByClass(UAttackTokenComponent::StaticClass()));
     PlayerAttackTokenComponent->ReturnAttackToken();
+}
+
+void AGeneralEnemy::Attack()
+{
+    float AttackDelay = PlayAnimMontage(AttackAnim);
+    GetWorld()->GetTimerManager().SetTimer(AttackTimerHandle,this,&AGeneralEnemy::OnAttackEnded, AttackDelay,false);
+    GetCharacterMovement()->MaxWalkSpeed = 0;    
+
 }

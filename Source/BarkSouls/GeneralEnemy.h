@@ -28,6 +28,8 @@ class BARKSOULS_API AGeneralEnemy : public AEnemyBase, public IGeneralEnemyAII
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack, meta = (AllowprivateAccess = "true"))
 	UAnimMontage* AttackAnim;
 
+	FTimerHandle AttackTimerHandle;
+
 public:
 	AGeneralEnemy();
 
@@ -42,4 +44,6 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override; 
+	
+	void OnAttackEnded();
 };

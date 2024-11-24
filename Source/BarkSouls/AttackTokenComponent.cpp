@@ -40,14 +40,6 @@ void UAttackTokenComponent::BeginPlay()
 void UAttackTokenComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if(AttackReserveList.Num() > 0)
-	{
-		for (ABase_AIController* Element : AttackReserveList)
-    	{
-        	// Unreal Engine의 로그 시스템을 사용하여 콘솔에 출력
-        	UE_LOG(LogTemp, Warning, TEXT("Array Element: %s"), *Element->GetName());
-    	}
-	}
 
 	// ...
 }
@@ -67,7 +59,6 @@ void UAttackTokenComponent::ReturnAttackToken()
 bool UAttackTokenComponent::ReserveAttackToken(ABase_AIController* Target)
 {
 	AttackReserveList.Add(Target);
-	UE_LOG(LogTemp, Warning, TEXT("Name : %s"), *Target->GetName());
 	if(AttackTokenCount > 0)
 	{
 		AttackTokenCount -= 1;

@@ -26,6 +26,9 @@ public:
 
 	void ChangeStateAttack();
 
+	UPROPERTY(BlueprintReadOnly)
+	bool AttackReady = false;
+
 private:
 
 	UPROPERTY(EditAnywhere, meta = (Allowprivateaccess = "true"))
