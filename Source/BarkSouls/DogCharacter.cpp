@@ -4,6 +4,7 @@
 #include "InputMappingContext.h"
 #include "GameFramework/SpringArmComponent.h"
 #include <Camera/CameraComponent.h>
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "DogCharacter.h"
 
@@ -37,18 +38,28 @@ ADogCharacter::ADogCharacter()
 	if(InputActionFight.Succeeded()){
 		InputToFight = InputActionFight.Object;
 	}
-	
+
+	//컨트롤러 방향에 회전하지 않도록
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
 
 	//springArm
 	springArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	springArmComp->SetupAttachment(RootComponent);
-		// 차후 값 수정
-	springArmComp->SetRelativeLocation(FVector(0, 30, 0)); 
-	springArmComp->TargetArmLength = 200;
 
+	springArmComp->bUsePawnControlRotation = true;
+	springArmComp->TargetArmLength = 250;
+	springArmComp->SetRelativeLocation(FVector(0, 25, 0)); 
+	
 	//Camera
 	cameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	cameraComp->SetupAttachment(springArmComp);
+	cameraComp->bUsePawnControlRotation = false;
+
+	//Character Setup
+	GetCharacterMovement()->bOrientRotationToMovement = true; // 캐릭터가 인풋에 의해 방향을 정의하도록	
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // 회전 속도 
 
 }
 
@@ -94,22 +105,18 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	
-	//트리거 출력 결과 -> Tab : 0, 0	Hold : +1, 0
-	//WASD 입력중에 spacebar를 입력하는 경우 -> 현재 입력되고 있는 Vector의 x값이 무조건 1로 변함
-
 	if (Controller != nullptr)
 	{
-		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator Rotation = GetActorRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
+		//Forward 및 Right 벡터 계산
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
-		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y*0.1);
-		AddMovementInput(RightDirection, MovementVector.X*0.1);
+		AddMovementInput(ForwardDirection, MovementVector.Y*walkspeed);
+		AddMovementInput(RightDirection, MovementVector.X*walkspeed);
 	}
 }
 
@@ -124,22 +131,31 @@ void ADogCharacter::EnhancedInputLook(const FInputActionValue& Value){
 }
 //공격 모션 12번째 트라이
 void ADogCharacter::EnhancedInputFight(const FInputActionValue& Value){
-	bool v = Value.Get<bool>();
+	float inputValue = Value.Get<float>();
+	UE_LOG(LogTemp, Display, TEXT("Input Value: %f"), inputValue); //부정을 통해 오른쪽 왼쪽 값 분리함
 
-	PressAtk();
+	PressAtk(inputValue);
 }
 
-void ADogCharacter::PressAtk()
+void ADogCharacter::PressAtk(float inputValue)
 {
 	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
 	if(animInstance->IsAnyMontagePlaying()){
 		return; //이미 공격중에는 연속 입력이 안되기 위함 
 	}
-	animInstance->Montage_Play(AttackMontage);
+	if(inputValue == 1.0f){
+		animInstance->Montage_Play(LAttackMontage); //좌 클릭 시 약 공격
+	}
+	else if(inputValue == -1.0f){
+		animInstance->Montage_Play(HAttackMontage); //우 클릭 시 강 공격
+	}
+	//else{}
 }
 
 void ADogCharacter::EnhancedInputRoll(const FInputActionValue& Value){
 	FVector CurrentVelocity = GetVelocity(); //ACharacter 함수
+	UE_LOG(LogTemp, Display, TEXT("Velocity: %s"), *CurrentVelocity.ToString());
+	UE_LOG(LogTemp, Display, TEXT("Speed: %f"), CurrentVelocity.Size()); //정상적으로 0 출력됨 문제 확인해 볼 것
 
 	if(CurrentVelocity.Size()){
 		LaunchCharacter(CurrentVelocity*5, false, false);

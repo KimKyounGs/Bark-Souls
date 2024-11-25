@@ -11,8 +11,6 @@ class BARKSOULS_API ADogCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	
-
 public:
 	// Sets default values for this character's properties
 	ADogCharacter();
@@ -32,6 +30,8 @@ public:
 public:
 
 	bool bAttacking;
+	float walkspeed = 0.25;
+	float runspeed = 0.75;
 
 	UPROPERTY(VisibleAnywhere, Category=Camera)
 	class USpringArmComponent* springArmComp;
@@ -40,9 +40,12 @@ public:
 	class UCameraComponent* cameraComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
-	class UAnimMontage* AttackMontage;
+	class UAnimMontage* LAttackMontage;
 
-	void PressAtk();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
+	class UAnimMontage* HAttackMontage;
+
+	void PressAtk(float inputValue);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Enhanced Input")
