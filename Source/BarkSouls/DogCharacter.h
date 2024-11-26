@@ -28,11 +28,6 @@ public:
 
 
 public:
-
-	bool bAttacking;
-	float walkspeed = 0.25;
-	float runspeed = 0.75;
-
 	UPROPERTY(VisibleAnywhere, Category=Camera)
 	class USpringArmComponent* springArmComp;
 
@@ -48,6 +43,16 @@ public:
 	void PressAtk(float inputValue);
 
 protected:
+
+	bool bAttacking;
+	float walkspeed = 0.25;
+	float runspeed = 0.75;
+
+	float Health;
+
+	float Stamina = 100;
+	float stamina_Regain = 0.01;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Enhanced Input")
 	class UInputMappingContext* DefaultMappingContext;
 

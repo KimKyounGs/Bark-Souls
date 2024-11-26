@@ -84,7 +84,10 @@ void ADogCharacter::BeginPlay()
 void ADogCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	UE_LOG(LogTemp, Display, TEXT("Stamina: %f"), Stamina);
+	if(Stamina < 100.f){
+		Stamina += stamina_Regain;
+	}
 }
 
 // Called to bind functionality to input(Override)
@@ -107,7 +110,7 @@ void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 	
 	if (Controller != nullptr)
 	{
-		const FRotator Rotation = GetActorRotation();
+		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		//Forward 및 Right 벡터 계산
@@ -127,7 +130,13 @@ void ADogCharacter::EnhancedInputLook(const FInputActionValue& Value){
 		AddControllerYawInput(LookVector.X);
 		AddControllerPitchInput(LookVector.Y);
 	}
-	
+	// if (springArmComp != nullptr){ // 최후의 수단 -> 그냥 카메라가 회전을 안함 ㅋㅋ
+	// 	FRotator NewRotation = springArmComp->GetRelativeRotation(); 
+    //     NewRotation.Yaw += LookVector.X;
+    //     NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch + LookVector.Y, -80.0f, 80.0f); // Pitch 제한
+    //     springArmComp->SetRelativeRotation(NewRotation);
+	// }
+		
 }
 //공격 모션 12번째 트라이
 void ADogCharacter::EnhancedInputFight(const FInputActionValue& Value){
@@ -141,13 +150,15 @@ void ADogCharacter::PressAtk(float inputValue)
 {
 	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
 	if(animInstance->IsAnyMontagePlaying()){
-		return; //이미 공격중에는 연속 입력이 안되기 위함 
+		return; // 이미 공격중에는 연속 입력이 안되기 위함 
 	}
-	if(inputValue == 1.0f){
-		animInstance->Montage_Play(LAttackMontage); //좌 클릭 시 약 공격
+	if(inputValue == 1.0f && Stamina >= 10.f){
+		animInstance->Montage_Play(LAttackMontage); // 좌 클릭 시 약 공격
+		Stamina -= 10.f;
 	}
-	else if(inputValue == -1.0f){
-		animInstance->Montage_Play(HAttackMontage); //우 클릭 시 강 공격
+	else if(inputValue == -1.0f && Stamina >= 20.f){
+		animInstance->Montage_Play(HAttackMontage); // 우 클릭 시 강 공격
+		Stamina -= 20.f;
 	}
 	//else{}
 }
