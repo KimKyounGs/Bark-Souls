@@ -29,14 +29,19 @@ ADogCharacter::ADogCharacter()
 	if(InputActionLook.Succeeded()){
 		InputToLook = InputActionLook.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionRoll(TEXT("/Game/Kwanik/Input/IA_RunAndRoll.IA_RunAndRoll"));
-	if(InputActionRoll.Succeeded()){
-		InputToRoll = InputActionRoll.Object;
+	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionRunAndRoll(TEXT("/Game/Kwanik/Input/IA_RunAndRoll.IA_RunAndRoll"));
+	if(InputActionRunAndRoll.Succeeded()){
+		InputToRunAndRoll = InputActionRunAndRoll.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionFight(TEXT("/Game/Kwanik/Input/IA_Fight.IA_Fight"));
 	if(InputActionFight.Succeeded()){
 		InputToFight = InputActionFight.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionParry(TEXT("/Game/Kwanik/Input/IA_Parry.IA_Parry"));
+	if(InputActionFight.Succeeded()){
+		InputToParry = InputActionParry.Object;
 	}
 
 	//컨트롤러 방향에 회전하지 않도록
@@ -99,7 +104,8 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	if(EnhancedInputComponent != nullptr){
 		EnhancedInputComponent->BindAction(InputToMove, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputMove);
 		EnhancedInputComponent->BindAction(InputToLook, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputLook);
-		EnhancedInputComponent->BindAction(InputToRoll, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputRoll);
+		EnhancedInputComponent->BindAction(InputToRunAndRoll, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputRunAndRoll);
+		EnhancedInputComponent->BindAction(InputToRunAndRoll, ETriggerEvent::Completed, this, &ADogCharacter::EnhancedInputRunReleased);
 		EnhancedInputComponent->BindAction(InputToFight, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputFight);
 	}
 
@@ -118,8 +124,15 @@ void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y*walkspeed);
-		AddMovementInput(RightDirection, MovementVector.X*walkspeed);
+		if(!bIsRunning){
+			AddMovementInput(ForwardDirection, MovementVector.Y*walkspeed);
+			AddMovementInput(RightDirection, MovementVector.X*walkspeed);
+		}
+		else{
+			AddMovementInput(ForwardDirection, MovementVector.Y*runspeed);
+			AddMovementInput(RightDirection, MovementVector.X*runspeed);
+		}
+		
 	}
 }
 
@@ -129,14 +142,7 @@ void ADogCharacter::EnhancedInputLook(const FInputActionValue& Value){
 	if (Controller != nullptr){
 		AddControllerYawInput(LookVector.X);
 		AddControllerPitchInput(LookVector.Y);
-	}
-	// if (springArmComp != nullptr){ // 최후의 수단 -> 그냥 카메라가 회전을 안함 ㅋㅋ
-	// 	FRotator NewRotation = springArmComp->GetRelativeRotation(); 
-    //     NewRotation.Yaw += LookVector.X;
-    //     NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch + LookVector.Y, -80.0f, 80.0f); // Pitch 제한
-    //     springArmComp->SetRelativeRotation(NewRotation);
-	// }
-		
+	}	
 }
 //공격 모션 12번째 트라이
 void ADogCharacter::EnhancedInputFight(const FInputActionValue& Value){
@@ -163,15 +169,27 @@ void ADogCharacter::PressAtk(float inputValue)
 	//else{}
 }
 
-void ADogCharacter::EnhancedInputRoll(const FInputActionValue& Value){
+void ADogCharacter::EnhancedInputRunAndRoll(const FInputActionValue& Value){
 	FVector CurrentVelocity = GetVelocity(); //ACharacter 함수
 	UE_LOG(LogTemp, Display, TEXT("Velocity: %s"), *CurrentVelocity.ToString());
 	UE_LOG(LogTemp, Display, TEXT("Speed: %f"), CurrentVelocity.Size()); //정상적으로 0 출력됨 문제 확인해 볼 것
 
-	if(CurrentVelocity.Size()){
-		LaunchCharacter(CurrentVelocity*5, false, false);
+	if(!bIsRolling && !bIsRunning){ //구르기
+		bIsRolling = true;
+		if(CurrentVelocity.Size()){
+			LaunchCharacter(CurrentVelocity*5, false, false);
+		}
+		else { //제자리에서 깡총깡총
+			LaunchCharacter(FVector(-10, 0, 0), true, false);
+		}
+		bIsRolling = false;
+		bIsRunning = true;
 	}
-	else { //제자리에서 깡총깡총
-		LaunchCharacter(FVector(0, -10, 0), true, false);
+	
+	
+}
+void ADogCharacter::EnhancedInputRunReleased(const FInputActionValue& Value){
+	if(bIsRunning){
+		bIsRunning = false;
 	}
 }

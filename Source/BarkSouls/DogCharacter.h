@@ -45,8 +45,12 @@ public:
 protected:
 
 	bool bAttacking;
+
 	float walkspeed = 0.25;
 	float runspeed = 0.75;
+	
+	bool bIsRunning = false;
+	bool bIsRolling = false;
 
 	float Health;
 
@@ -63,19 +67,21 @@ protected:
 	class UInputAction* InputToLook;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
-	class UInputAction* InputToRoll;
+	class UInputAction* InputToRunAndRoll;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
 	class UInputAction* InputToFight;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
-	//class UInputTriggerHold* RunTrigger;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
+	class UInputAction* InputToParry;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
-	//class UInputTriggerPressed* RollTrigger;
 
 	void EnhancedInputMove(const FInputActionValue& Value);
 	void EnhancedInputLook(const FInputActionValue& Value);
-	void EnhancedInputRoll(const FInputActionValue& Value);
+
+	void EnhancedInputRunAndRoll(const FInputActionValue& Value);
+	void EnhancedInputRunReleased(const FInputActionValue& Value);
+
 	void EnhancedInputFight(const FInputActionValue& Value);
+	void EnhancedInputParry(const FInputActionValue& Value);
 };
