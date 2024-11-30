@@ -27,7 +27,6 @@ void ABonfire::BeginPlay()
 
 }
 
-
 void ABonfire::Interact(AActor* Player)
 {
 	if (!bIsRegistered) // 아직 등록되지 않은 경우
