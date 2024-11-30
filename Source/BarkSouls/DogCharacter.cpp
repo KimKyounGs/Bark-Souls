@@ -89,8 +89,13 @@ void ADogCharacter::BeginPlay()
 void ADogCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UE_LOG(LogTemp, Display, TEXT("Stamina: %f"), Stamina);
-	if(Stamina < 100.f){
+	//UE_LOG(LogTemp, Display, TEXT("Stamina: %f"), Stamina);
+	if(bIsRunning && Stamina > 0f){
+		Stamina -= stamina_Regain;
+		if(Stamina <= 0f) {
+			bIsRunning = false;
+		}
+	}else if(Stamina < 100.f){
 		Stamina += stamina_Regain;
 	}
 }
