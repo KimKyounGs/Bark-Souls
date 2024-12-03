@@ -6,6 +6,18 @@
 
 #include "DogCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EState : uint8
+{
+	Ready UMETA(DisplayName="Ready"),
+	Run UMETA(DisplayName="Run"),
+	Roll UMETA(DisplayName="Roll"),
+	Walk UMETA(DisplayName="Walk"),
+	Attack UMETA(DisplayName="Attack"),
+	Parry UMETA(DisplayName="Parry"),
+	Dead UMETA(DisplayName="Dead")
+};
+
 UCLASS()
 class BARKSOULS_API ADogCharacter : public ACharacter
 {
@@ -57,6 +69,11 @@ protected:
 	float Stamina = 100;
 	float stamina_Regain = 0.01;
 
+	FTimerHandle TimerHandle;
+
+	UPROPERTY(EditAnywhere)
+	EState CharacterState;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Enhanced Input")
 	class UInputMappingContext* DefaultMappingContext;
 
@@ -84,4 +101,5 @@ protected:
 
 	void EnhancedInputFight(const FInputActionValue& Value);
 	void EnhancedInputParry(const FInputActionValue& Value);
+	void ParryEnd();
 };

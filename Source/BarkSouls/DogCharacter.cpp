@@ -5,6 +5,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include <Camera/CameraComponent.h>
 #include "GameFramework/CharacterMovementComponent.h"
+#include "TimerManager.h"
 
 #include "DogCharacter.h"
 
@@ -82,7 +83,6 @@ void ADogCharacter::BeginPlay()
 		}
 	}
 	
-	
 }
 
 // Called every frame
@@ -90,9 +90,9 @@ void ADogCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//UE_LOG(LogTemp, Display, TEXT("Stamina: %f"), Stamina);
-	if(bIsRunning && Stamina > 0f){
+	if(bIsRunning && Stamina > 0.0f){
 		Stamina -= stamina_Regain;
-		if(Stamina <= 0f) {
+		if(Stamina <= 0.0f) {
 			bIsRunning = false;
 		}
 	}else if(Stamina < 100.f){
@@ -197,4 +197,12 @@ void ADogCharacter::EnhancedInputRunReleased(const FInputActionValue& Value){
 	if(bIsRunning){
 		bIsRunning = false;
 	}
+}
+void ADogCharacter::EnhancedInputParry(const FInputActionValue& Value){
+	CharacterState = EState::Parry;
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADogCharacter::ParryEnd, 0.3f, false);
+	//패링 성공시 코드 추가  
+}
+void ADogCharacter::ParryEnd(){
+	CharacterState = EState::Ready;
 }
