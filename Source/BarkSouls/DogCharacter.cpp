@@ -12,7 +12,6 @@
 // Sets default values
 ADogCharacter::ADogCharacter()
 {
-	bAttacking = false;
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -67,6 +66,9 @@ ADogCharacter::ADogCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true; // 캐릭터가 인풋에 의해 방향을 정의하도록	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // 회전 속도 
 
+	//Initialize State
+	CharacterState = EState::Ready;
+
 }
 
 // Called when the game starts or when spawned
@@ -90,10 +92,10 @@ void ADogCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//UE_LOG(LogTemp, Display, TEXT("Stamina: %f"), Stamina);
-	if(bIsRunning && Stamina > 0.0f){
+	if(CharacterState == EState::Run && Stamina > 0.0f){
 		Stamina -= stamina_Regain;
 		if(Stamina <= 0.0f) {
-			bIsRunning = false;
+			SetCharacterState(EState::Walk);
 		}
 	}else if(Stamina < 100.f){
 		Stamina += stamina_Regain;
@@ -116,6 +118,10 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 }
 
+void ADogCharacter::SetCharacterState(EState NewState){
+	CharacterState = NewState;
+}
+
 void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	
@@ -128,15 +134,9 @@ void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		// add movement 
-		if(!bIsRunning){
-			AddMovementInput(ForwardDirection, MovementVector.Y*walkspeed);
-			AddMovementInput(RightDirection, MovementVector.X*walkspeed);
-		}
-		else{
-			AddMovementInput(ForwardDirection, MovementVector.Y*runspeed);
-			AddMovementInput(RightDirection, MovementVector.X*runspeed);
-		}
+		float CurrentSpeed = (CharacterState == EState::Run) ? runspeed : walkspeed;
+		AddMovementInput(ForwardDirection, MovementVector.Y * CurrentSpeed);
+        AddMovementInput(RightDirection, MovementVector.X * CurrentSpeed);
 		
 	}
 }
@@ -155,6 +155,7 @@ void ADogCharacter::EnhancedInputFight(const FInputActionValue& Value){
 	UE_LOG(LogTemp, Display, TEXT("Input Value: %f"), inputValue); //부정을 통해 오른쪽 왼쪽 값 분리함
 
 	PressAtk(inputValue);
+	SetCharacterState(EState::Ready);
 }
 
 void ADogCharacter::PressAtk(float inputValue)
@@ -163,6 +164,7 @@ void ADogCharacter::PressAtk(float inputValue)
 	if(animInstance->IsAnyMontagePlaying()){
 		return; // 이미 공격중에는 연속 입력이 안되기 위함 
 	}
+	SetCharacterState(EState::Attack);
 	if(inputValue == 1.0f && Stamina >= 10.f){
 		animInstance->Montage_Play(LAttackMontage); // 좌 클릭 시 약 공격
 		Stamina -= 10.f;
@@ -179,23 +181,25 @@ void ADogCharacter::EnhancedInputRunAndRoll(const FInputActionValue& Value){
 	UE_LOG(LogTemp, Display, TEXT("Velocity: %s"), *CurrentVelocity.ToString());
 	UE_LOG(LogTemp, Display, TEXT("Speed: %f"), CurrentVelocity.Size()); //정상적으로 0 출력됨 문제 확인해 볼 것
 
-	if(!bIsRolling && !bIsRunning){ //구르기
-		bIsRolling = true;
+	if(CharacterState == EState::Ready || CharacterState == EState::Walk){ //구르기
+		SetCharacterState(EState::Roll);
 		if(CurrentVelocity.Size()){
 			LaunchCharacter(CurrentVelocity*5, false, false);
 		}
 		else { //제자리에서 깡총깡총
 			LaunchCharacter(FVector(-10, 0, 0), true, false);
 		}
-		bIsRolling = false;
-		bIsRunning = true;
+		SetCharacterState(EState::Run);
 	}
 	
 	
 }
 void ADogCharacter::EnhancedInputRunReleased(const FInputActionValue& Value){
-	if(bIsRunning){
-		bIsRunning = false;
+	if(CharacterState == EState::Run){
+		SetCharacterState(EState::Walk);
+	}
+	else if(CharacterState == EState::Roll){
+		SetCharacterState(EState::Ready);
 	}
 }
 void ADogCharacter::EnhancedInputParry(const FInputActionValue& Value){

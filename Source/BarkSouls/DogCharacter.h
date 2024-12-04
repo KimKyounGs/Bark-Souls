@@ -55,14 +55,8 @@ public:
 	void PressAtk(float inputValue);
 
 protected:
-
-	bool bAttacking;
-
-	float walkspeed = 0.25;
+	float walkspeed = 0.5;
 	float runspeed = 0.75;
-	
-	bool bIsRunning = false;
-	bool bIsRolling = false;
 
 	float Health;
 
@@ -92,14 +86,21 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
 	class UInputAction* InputToParry;
 
+	//상태 관리
+	void SetCharacterState(EState NewState);
+	
+	//이동 관련 함수
+	void EnhancedInputMove(const FInputActionValue& Value); //Move
+	void EnhancedInputLook(const FInputActionValue& Value); //Look
+	void EnhancedInputRunAndRoll(const FInputActionValue& Value); //Run and Roll
+	void EnhancedInputRunReleased(const FInputActionValue& Value); //Run End
 
-	void EnhancedInputMove(const FInputActionValue& Value);
-	void EnhancedInputLook(const FInputActionValue& Value);
+	//전투 관련 함수
+	void EnhancedInputFight(const FInputActionValue& Value); //Attack
+	void EnhancedInputParry(const FInputActionValue& Value); //Parrying
+	void ParryEnd(); //Timer callback 
 
-	void EnhancedInputRunAndRoll(const FInputActionValue& Value);
-	void EnhancedInputRunReleased(const FInputActionValue& Value);
-
-	void EnhancedInputFight(const FInputActionValue& Value);
-	void EnhancedInputParry(const FInputActionValue& Value);
-	void ParryEnd();
+	//데미지 시스템 :: 미구현 
+	//virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	//void ApplyDamageToEnemy(AActor* Enemy, float Damage);
 };
