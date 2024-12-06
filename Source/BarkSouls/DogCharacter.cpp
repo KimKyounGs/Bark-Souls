@@ -6,6 +6,8 @@
 #include <Camera/CameraComponent.h>
 #include "GameFramework/CharacterMovementComponent.h"
 #include "TimerManager.h"
+#include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "DogCharacter.h"
 
@@ -69,6 +71,13 @@ ADogCharacter::ADogCharacter()
 	//Initialize State
 	CharacterState = EState::Ready;
 
+	//HitBox Initialize
+	AttackHitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackHitBox"));
+	//AttackHitBox->SetupAttachment(GetMesh(), FName("ForwardLeg")); 
+	AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); //기본: 비활성화
+	AttackHitBox->SetCollisionResponseToAllChannels(ECR_Ignore);
+	AttackHitBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
 }
 
 // Called when the game starts or when spawned
@@ -84,7 +93,8 @@ void ADogCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-	
+	//HitBox Overlap Event Bind
+	AttackHitBox->OnComponentBeginOverlap.AddDynamic(this, &ADogCharacter::OnAttackHitBoxBeginOverlap);
 }
 
 // Called every frame
@@ -140,42 +150,6 @@ void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 		
 	}
 }
-
-void ADogCharacter::EnhancedInputLook(const FInputActionValue& Value){
-	FVector2D LookVector = Value.Get<FVector2D>();
-	
-	if (Controller != nullptr){
-		AddControllerYawInput(LookVector.X);
-		AddControllerPitchInput(LookVector.Y);
-	}	
-}
-//공격 모션 12번째 트라이
-void ADogCharacter::EnhancedInputFight(const FInputActionValue& Value){
-	float inputValue = Value.Get<float>();
-	UE_LOG(LogTemp, Display, TEXT("Input Value: %f"), inputValue); //부정을 통해 오른쪽 왼쪽 값 분리함
-
-	PressAtk(inputValue);
-	SetCharacterState(EState::Ready);
-}
-
-void ADogCharacter::PressAtk(float inputValue)
-{
-	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
-	if(animInstance->IsAnyMontagePlaying()){
-		return; // 이미 공격중에는 연속 입력이 안되기 위함 
-	}
-	SetCharacterState(EState::Attack);
-	if(inputValue == 1.0f && Stamina >= 10.f){
-		animInstance->Montage_Play(LAttackMontage); // 좌 클릭 시 약 공격
-		Stamina -= 10.f;
-	}
-	else if(inputValue == -1.0f && Stamina >= 20.f){
-		animInstance->Montage_Play(HAttackMontage); // 우 클릭 시 강 공격
-		Stamina -= 20.f;
-	}
-	//else{}
-}
-
 void ADogCharacter::EnhancedInputRunAndRoll(const FInputActionValue& Value){
 	FVector CurrentVelocity = GetVelocity(); //ACharacter 함수
 	UE_LOG(LogTemp, Display, TEXT("Velocity: %s"), *CurrentVelocity.ToString());
@@ -202,6 +176,46 @@ void ADogCharacter::EnhancedInputRunReleased(const FInputActionValue& Value){
 		SetCharacterState(EState::Ready);
 	}
 }
+
+void ADogCharacter::EnhancedInputLook(const FInputActionValue& Value){
+	FVector2D LookVector = Value.Get<FVector2D>();
+	
+	if (Controller != nullptr){
+		AddControllerYawInput(LookVector.X);
+		AddControllerPitchInput(LookVector.Y);
+	}	
+}
+
+//공격 모션 12번째 트라이
+void ADogCharacter::EnhancedInputFight(const FInputActionValue& Value){
+	float inputValue = Value.Get<float>();
+	UE_LOG(LogTemp, Display, TEXT("Input Value: %f"), inputValue); //부정을 통해 오른쪽 왼쪽 값 분리함
+
+	PressAtk(inputValue);
+	SetCharacterState(EState::Ready);
+}
+void ADogCharacter::PressAtk(float inputValue)
+{
+	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+	if(animInstance->IsAnyMontagePlaying()){
+		return; // 이미 공격중에는 연속 입력이 안되기 위함 
+	}
+	SetCharacterState(EState::Attack);
+	if(inputValue == 1.0f && Stamina >= 10.f){
+		animInstance->Montage_Play(LAttackMontage); // 좌 클릭 시 약 공격
+		Stamina -= 10.f;
+
+		EnableAttackHitBox();
+	}
+	else if(inputValue == -1.0f && Stamina >= 20.f){
+		animInstance->Montage_Play(HAttackMontage); // 우 클릭 시 강 공격
+		Stamina -= 20.f;
+
+		EnableAttackHitBox();
+	}
+	//else{}
+}
+
 void ADogCharacter::EnhancedInputParry(const FInputActionValue& Value){
 	CharacterState = EState::Parry;
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADogCharacter::ParryEnd, 0.3f, false);
@@ -209,4 +223,27 @@ void ADogCharacter::EnhancedInputParry(const FInputActionValue& Value){
 }
 void ADogCharacter::ParryEnd(){
 	CharacterState = EState::Ready;
+}
+float ADogCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser){
+	float ActualDamage = Super::Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	Health -= ActualDamage;
+
+	if(Health <= 0.0f){
+		SetCharacterState(EState::Dead);
+	}
+
+	return ActualDamage;
+}
+
+void ADogCharacter::EnableAttackHitBox(){
+	AttackHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+void ADogCharacter::DisableAttackHitBox(){
+	AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+void ADogCharacter::OnAttackHitBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult){
+	if(OtherActor && OtherActor != this){
+		UGameplayStatics::ApplyDamage(OtherActor, 20.0f, GetController(), this, nullptr);
+		UE_LOG(LogTemp, Display, TEXT("Hit: %s"), *OtherActor->GetName());
+	}
 }

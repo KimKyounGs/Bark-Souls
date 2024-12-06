@@ -1,6 +1,7 @@
 #include "InputActionValue.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Components/BoxComponent.h"
 
 #pragma once
 
@@ -54,14 +55,18 @@ public:
 
 	void PressAtk(float inputValue);
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Attack")
+	class UBoxComponent* AttackHitBox;
+
+
 protected:
-	float walkspeed = 0.5;
-	float runspeed = 0.75;
+	float walkspeed = 0.5f;
+	float runspeed = 0.75f;
 
-	float Health;
+	float Health = 100.0f;
 
-	float Stamina = 100;
-	float stamina_Regain = 0.01;
+	float Stamina = 100.0f;
+	float stamina_Regain = 0.01f;
 
 	FTimerHandle TimerHandle;
 
@@ -99,8 +104,14 @@ protected:
 	void EnhancedInputFight(const FInputActionValue& Value); //Attack
 	void EnhancedInputParry(const FInputActionValue& Value); //Parrying
 	void ParryEnd(); //Timer callback 
+	UFUNCTION()
+	void OnAttackHitBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void EnableAttackHitBox();
+	UFUNCTION()
+	void DisableAttackHitBox();
 
 	//데미지 시스템 :: 미구현 
-	//virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	//void ApplyDamageToEnemy(AActor* Enemy, float Damage);
 };
