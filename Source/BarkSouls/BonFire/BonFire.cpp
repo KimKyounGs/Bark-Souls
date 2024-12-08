@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Bonfire.h"
 
 // 정적 변수 초기화

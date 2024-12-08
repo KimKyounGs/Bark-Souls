@@ -1,10 +1,23 @@
 #include "InputActionValue.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Components/BoxComponent.h"
 
 #pragma once
 
 #include "DogCharacter.generated.h"
+
+UENUM(BlueprintType)
+enum class EState : uint8
+{
+	Ready UMETA(DisplayName="Ready"),
+	Run UMETA(DisplayName="Run"),
+	Roll UMETA(DisplayName="Roll"),
+	Walk UMETA(DisplayName="Walk"),
+	Attack UMETA(DisplayName="Attack"),
+	Parry UMETA(DisplayName="Parry"),
+	Dead UMETA(DisplayName="Dead")
+};
 
 UCLASS()
 class BARKSOULS_API ADogCharacter : public ACharacter
@@ -42,20 +55,23 @@ public:
 
 	void PressAtk(float inputValue);
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Attack")
+	class UBoxComponent* AttackHitBox;
+
+
 protected:
+	float walkspeed = 0.5f;
+	float runspeed = 0.75f;
 
-	bool bAttacking;
+	float Health = 100.0f;
 
-	float walkspeed = 0.25;
-	float runspeed = 0.75;
-	
-	bool bIsRunning = false;
-	bool bIsRolling = false;
+	float Stamina = 100.0f;
+	float stamina_Regain = 0.01f;
 
-	float Health;
+	FTimerHandle TimerHandle;
 
-	float Stamina = 100;
-	float stamina_Regain = 0.01;
+	UPROPERTY(EditAnywhere)
+	EState CharacterState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Enhanced Input")
 	class UInputMappingContext* DefaultMappingContext;
@@ -75,13 +91,28 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
 	class UInputAction* InputToParry;
 
+	//상태 관리
+	void SetCharacterState(EState NewState);
+	
+	//이동 관련 함수
+	void EnhancedInputMove(const FInputActionValue& Value); //Move
+	void EnhancedInputWalkReleased(const FInputActionValue& Value); //Move Release
+	void EnhancedInputLook(const FInputActionValue& Value); //Look
+	void EnhancedInputRunAndRoll(const FInputActionValue& Value); //Run and Roll
+	void EnhancedInputRunReleased(const FInputActionValue& Value); //Run End
 
-	void EnhancedInputMove(const FInputActionValue& Value);
-	void EnhancedInputLook(const FInputActionValue& Value);
+	//전투 관련 함수
+	void EnhancedInputFight(const FInputActionValue& Value); //Attack
+	void EnhancedInputParry(const FInputActionValue& Value); //Parrying
+	void ParryEnd(); //Timer callback 
+	UFUNCTION()
+	void OnAttackHitBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void EnableAttackHitBox();
+	UFUNCTION()
+	void DisableAttackHitBox();
 
-	void EnhancedInputRunAndRoll(const FInputActionValue& Value);
-	void EnhancedInputRunReleased(const FInputActionValue& Value);
-
-	void EnhancedInputFight(const FInputActionValue& Value);
-	void EnhancedInputParry(const FInputActionValue& Value);
+	//데미지 시스템 :: 미구현 
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	//void ApplyDamageToEnemy(AActor* Enemy, float Damage);
 };

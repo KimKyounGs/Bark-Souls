@@ -5,13 +5,15 @@
 #include "GameFramework/SpringArmComponent.h"
 #include <Camera/CameraComponent.h>
 #include "GameFramework/CharacterMovementComponent.h"
+#include "TimerManager.h"
+#include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "DogCharacter.h"
 
 // Sets default values
 ADogCharacter::ADogCharacter()
 {
-	bAttacking = false;
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -66,6 +68,16 @@ ADogCharacter::ADogCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true; // 캐릭터가 인풋에 의해 방향을 정의하도록	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // 회전 속도 
 
+	//Initialize State
+	CharacterState = EState::Ready;
+
+	//HitBox Initialize
+	AttackHitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackHitBox"));
+	//AttackHitBox->SetupAttachment(GetMesh(), FName("ForwardLeg")); 
+	AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); //기본: 비활성화
+	AttackHitBox->SetCollisionResponseToAllChannels(ECR_Ignore);
+	AttackHitBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
 }
 
 // Called when the game starts or when spawned
@@ -81,8 +93,8 @@ void ADogCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-	
-	
+	//HitBox Overlap Event Bind
+	AttackHitBox->OnComponentBeginOverlap.AddDynamic(this, &ADogCharacter::OnAttackHitBoxBeginOverlap);
 }
 
 // Called every frame
@@ -90,10 +102,10 @@ void ADogCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//UE_LOG(LogTemp, Display, TEXT("Stamina: %f"), Stamina);
-	if(bIsRunning && Stamina > 0f){
+	if(CharacterState == EState::Run && Stamina > 0.0f){
 		Stamina -= stamina_Regain;
-		if(Stamina <= 0f) {
-			bIsRunning = false;
+		if(Stamina <= 0.0f) {
+			SetCharacterState(EState::Walk);
 		}
 	}else if(Stamina < 100.f){
 		Stamina += stamina_Regain;
@@ -108,6 +120,7 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	if(EnhancedInputComponent != nullptr){
 		EnhancedInputComponent->BindAction(InputToMove, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputMove);
+		EnhancedInputComponent->BindAction(InputToMove, ETriggerEvent::Completed, this, &ADogCharacter::EnhancedInputWalkReleased);
 		EnhancedInputComponent->BindAction(InputToLook, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputLook);
 		EnhancedInputComponent->BindAction(InputToRunAndRoll, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputRunAndRoll);
 		EnhancedInputComponent->BindAction(InputToRunAndRoll, ETriggerEvent::Completed, this, &ADogCharacter::EnhancedInputRunReleased);
@@ -116,10 +129,14 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 }
 
+void ADogCharacter::SetCharacterState(EState NewState){
+	CharacterState = NewState;
+}
+
 void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	
-	if (Controller != nullptr)
+	if (Controller != nullptr && CharacterState != EState::Attack)
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -128,17 +145,35 @@ void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		// add movement 
-		if(!bIsRunning){
-			AddMovementInput(ForwardDirection, MovementVector.Y*walkspeed);
-			AddMovementInput(RightDirection, MovementVector.X*walkspeed);
-		}
-		else{
-			AddMovementInput(ForwardDirection, MovementVector.Y*runspeed);
-			AddMovementInput(RightDirection, MovementVector.X*runspeed);
-		}
+		float CurrentSpeed = (CharacterState == EState::Run) ? runspeed : walkspeed;
+		AddMovementInput(ForwardDirection, MovementVector.Y * CurrentSpeed);
+        AddMovementInput(RightDirection, MovementVector.X * CurrentSpeed);
 		
 	}
+}
+void ADogCharacter::EnhancedInputWalkReleased(const FInputActionValue& Value){
+	SetCharacterState(EState::Ready);
+}
+void ADogCharacter::EnhancedInputRunAndRoll(const FInputActionValue& Value){
+	FVector CurrentVelocity = GetVelocity(); //ACharacter 함수
+	UE_LOG(LogTemp, Display, TEXT("Velocity: %s"), *CurrentVelocity.ToString());
+	UE_LOG(LogTemp, Display, TEXT("Speed: %f"), CurrentVelocity.Size()); //정상적으로 0 출력됨 문제 확인해 볼 것
+
+	if(CharacterState == EState::Ready || CharacterState == EState::Walk){ //구르기
+		SetCharacterState(EState::Roll);
+		if(CurrentVelocity.Size()){
+			LaunchCharacter(CurrentVelocity*5, false, false);
+		}
+		else { //제자리에서 깡총깡총
+			LaunchCharacter(FVector(-10, 0, 0), true, false);
+		}
+		SetCharacterState(EState::Run);
+	}
+	
+	
+}
+void ADogCharacter::EnhancedInputRunReleased(const FInputActionValue& Value){
+	SetCharacterState(EState::Ready);
 }
 
 void ADogCharacter::EnhancedInputLook(const FInputActionValue& Value){
@@ -149,52 +184,65 @@ void ADogCharacter::EnhancedInputLook(const FInputActionValue& Value){
 		AddControllerPitchInput(LookVector.Y);
 	}	
 }
+
 //공격 모션 12번째 트라이
 void ADogCharacter::EnhancedInputFight(const FInputActionValue& Value){
 	float inputValue = Value.Get<float>();
 	UE_LOG(LogTemp, Display, TEXT("Input Value: %f"), inputValue); //부정을 통해 오른쪽 왼쪽 값 분리함
 
 	PressAtk(inputValue);
+	SetCharacterState(EState::Ready);
 }
-
 void ADogCharacter::PressAtk(float inputValue)
 {
 	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
 	if(animInstance->IsAnyMontagePlaying()){
 		return; // 이미 공격중에는 연속 입력이 안되기 위함 
 	}
+	SetCharacterState(EState::Attack);
 	if(inputValue == 1.0f && Stamina >= 10.f){
 		animInstance->Montage_Play(LAttackMontage); // 좌 클릭 시 약 공격
 		Stamina -= 10.f;
+
+		EnableAttackHitBox();
 	}
 	else if(inputValue == -1.0f && Stamina >= 20.f){
 		animInstance->Montage_Play(HAttackMontage); // 우 클릭 시 강 공격
 		Stamina -= 20.f;
+
+		EnableAttackHitBox();
 	}
 	//else{}
 }
 
-void ADogCharacter::EnhancedInputRunAndRoll(const FInputActionValue& Value){
-	FVector CurrentVelocity = GetVelocity(); //ACharacter 함수
-	UE_LOG(LogTemp, Display, TEXT("Velocity: %s"), *CurrentVelocity.ToString());
-	UE_LOG(LogTemp, Display, TEXT("Speed: %f"), CurrentVelocity.Size()); //정상적으로 0 출력됨 문제 확인해 볼 것
-
-	if(!bIsRolling && !bIsRunning){ //구르기
-		bIsRolling = true;
-		if(CurrentVelocity.Size()){
-			LaunchCharacter(CurrentVelocity*5, false, false);
-		}
-		else { //제자리에서 깡총깡총
-			LaunchCharacter(FVector(-10, 0, 0), true, false);
-		}
-		bIsRolling = false;
-		bIsRunning = true;
-	}
-	
-	
+void ADogCharacter::EnhancedInputParry(const FInputActionValue& Value){
+	CharacterState = EState::Parry;
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADogCharacter::ParryEnd, 0.3f, false);
+	//패링 성공시 코드 추가  
 }
-void ADogCharacter::EnhancedInputRunReleased(const FInputActionValue& Value){
-	if(bIsRunning){
-		bIsRunning = false;
+void ADogCharacter::ParryEnd(){
+	CharacterState = EState::Ready;
+}
+float ADogCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser){
+	float ActualDamage = Super::Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	Health -= ActualDamage;
+
+	if(Health <= 0.0f){
+		SetCharacterState(EState::Dead);
+	}
+
+	return ActualDamage;
+}
+
+void ADogCharacter::EnableAttackHitBox(){
+	AttackHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+void ADogCharacter::DisableAttackHitBox(){
+	AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+void ADogCharacter::OnAttackHitBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult){
+	if(OtherActor && OtherActor != this){
+		UGameplayStatics::ApplyDamage(OtherActor, 20.0f, GetController(), this, nullptr);
+		UE_LOG(LogTemp, Display, TEXT("Hit: %s"), *OtherActor->GetName());
 	}
 }
