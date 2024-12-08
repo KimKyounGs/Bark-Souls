@@ -125,6 +125,7 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	if(EnhancedInputComponent != nullptr){
 		EnhancedInputComponent->BindAction(InputToMove, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputMove);
+		EnhancedInputComponent->BindAction(InputToMove, ETriggerEvent::Completed, this, &ADogCharacter::EnhancedInputWalkReleased);
 		EnhancedInputComponent->BindAction(InputToLook, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputLook);
 		EnhancedInputComponent->BindAction(InputToRunAndRoll, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputRunAndRoll);
 		EnhancedInputComponent->BindAction(InputToRunAndRoll, ETriggerEvent::Completed, this, &ADogCharacter::EnhancedInputRunReleased);
@@ -141,7 +142,7 @@ void ADogCharacter::SetCharacterState(EState NewState){
 void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	
-	if (Controller != nullptr)
+	if (Controller != nullptr && CharacterState != EState::Attack)
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -155,6 +156,9 @@ void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
         AddMovementInput(RightDirection, MovementVector.X * CurrentSpeed);
 		
 	}
+}
+void ADogCharacter::EnhancedInputWalkReleased(const FInputActionValue& Value){
+	SetCharacterState(EState::Ready);
 }
 void ADogCharacter::EnhancedInputRunAndRoll(const FInputActionValue& Value){
 	FVector CurrentVelocity = GetVelocity(); //ACharacter 함수
@@ -175,12 +179,7 @@ void ADogCharacter::EnhancedInputRunAndRoll(const FInputActionValue& Value){
 	
 }
 void ADogCharacter::EnhancedInputRunReleased(const FInputActionValue& Value){
-	if(CharacterState == EState::Run){
-		SetCharacterState(EState::Walk);
-	}
-	else if(CharacterState == EState::Roll){
-		SetCharacterState(EState::Ready);
-	}
+	SetCharacterState(EState::Ready);
 }
 
 void ADogCharacter::EnhancedInputLook(const FInputActionValue& Value){
