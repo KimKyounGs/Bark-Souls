@@ -42,8 +42,13 @@ ADogCharacter::ADogCharacter()
 	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionParry(TEXT("/Game/Kwanik/Input/IA_Parry.IA_Parry"));
-	if(InputActionFight.Succeeded()){
+	if(InputActionParry.Succeeded()){
 		InputToParry = InputActionParry.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionInteraction(TEXT("/Game/Kwanik/Input/IA_Interaction.IA_Interaction"));
+	if (InputActionInteraction.Succeeded()) {
+		InputToParry = InputActionInteraction.Object;
 	}
 
 	//컨트롤러 방향에 회전하지 않도록
@@ -124,6 +129,7 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(InputToRunAndRoll, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputRunAndRoll);
 		EnhancedInputComponent->BindAction(InputToRunAndRoll, ETriggerEvent::Completed, this, &ADogCharacter::EnhancedInputRunReleased);
 		EnhancedInputComponent->BindAction(InputToFight, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputFight);
+		EnhancedInputComponent->BindAction(InputToInteraction, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputInteraction);
 	}
 
 }
@@ -152,8 +158,8 @@ void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 }
 void ADogCharacter::EnhancedInputRunAndRoll(const FInputActionValue& Value){
 	FVector CurrentVelocity = GetVelocity(); //ACharacter 함수
-	UE_LOG(LogTemp, Display, TEXT("Velocity: %s"), *CurrentVelocity.ToString());
-	UE_LOG(LogTemp, Display, TEXT("Speed: %f"), CurrentVelocity.Size()); //정상적으로 0 출력됨 문제 확인해 볼 것
+	// UE_LOG(LogTemp, Display, TEXT("Velocity: %s"), *CurrentVelocity.ToString());
+	// UE_LOG(LogTemp, Display, TEXT("Speed: %f"), CurrentVelocity.Size()); //정상적으로 0 출력됨 문제 확인해 볼 것
 
 	if(CharacterState == EState::Ready || CharacterState == EState::Walk){ //구르기
 		SetCharacterState(EState::Roll);
@@ -189,7 +195,7 @@ void ADogCharacter::EnhancedInputLook(const FInputActionValue& Value){
 //공격 모션 12번째 트라이
 void ADogCharacter::EnhancedInputFight(const FInputActionValue& Value){
 	float inputValue = Value.Get<float>();
-	UE_LOG(LogTemp, Display, TEXT("Input Value: %f"), inputValue); //부정을 통해 오른쪽 왼쪽 값 분리함
+	// UE_LOG(LogTemp, Display, TEXT("Input Value: %f"), inputValue); //부정을 통해 오른쪽 왼쪽 값 분리함
 
 	PressAtk(inputValue);
 	SetCharacterState(EState::Ready);
@@ -221,6 +227,12 @@ void ADogCharacter::EnhancedInputParry(const FInputActionValue& Value){
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADogCharacter::ParryEnd, 0.3f, false);
 	//패링 성공시 코드 추가  
 }
+
+void ADogCharacter::EnhancedInputInteraction(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("EnhancedInputInteraction"));
+}
+
 void ADogCharacter::ParryEnd(){
 	CharacterState = EState::Ready;
 }
