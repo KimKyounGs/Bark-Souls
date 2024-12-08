@@ -96,6 +96,7 @@ protected:
 	
 	//이동 관련 함수
 	void EnhancedInputMove(const FInputActionValue& Value); //Move
+	void EnhancedInputWalkReleased(const FInputActionValue& Value); //Move Release
 	void EnhancedInputLook(const FInputActionValue& Value); //Look
 	void EnhancedInputRunAndRoll(const FInputActionValue& Value); //Run and Roll
 	void EnhancedInputRunReleased(const FInputActionValue& Value); //Run End
