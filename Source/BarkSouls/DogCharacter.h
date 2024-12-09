@@ -53,6 +53,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
 	class UAnimMontage* HAttackMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
+	class UAnimMontage* RollingMontage;
+
 	void PressAtk(float inputValue);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Attack")
@@ -61,7 +64,7 @@ public:
 
 protected:
 	float walkspeed = 0.5f;
-	float runspeed = 0.75f;
+	float runspeed = 1.0f;
 
 	float Health = 100.0f;
 

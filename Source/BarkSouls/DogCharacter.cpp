@@ -158,9 +158,14 @@ void ADogCharacter::EnhancedInputRunAndRoll(const FInputActionValue& Value){
 	// UE_LOG(LogTemp, Display, TEXT("Speed: %f"), CurrentVelocity.Size()); //정상적으로 0 출력됨 문제 확인해 볼 것
 
 	if(CharacterState == EState::Ready || CharacterState == EState::Walk){ //구르기
+		UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+		if(animInstance->IsAnyMontagePlaying()){
+			return; // 이미 공격중에는 연속 입력이 안되기 위함 
+		}
 		SetCharacterState(EState::Roll);
 		if(CurrentVelocity.Size()){
 			LaunchCharacter(CurrentVelocity*5, false, false);
+			animInstance->Montage_Play(RollingMontage);
 		}
 		else { //제자리에서 깡총깡총
 			LaunchCharacter(FVector(-10, 0, 0), true, false);
