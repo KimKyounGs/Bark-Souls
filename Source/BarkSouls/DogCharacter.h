@@ -91,9 +91,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
 	class UInputAction* InputToParry;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enhanced Input")
-	class UInputAction* InputToInteraction;
-
 	//상태 관리
 	void SetCharacterState(EState NewState);
 	
@@ -108,9 +105,6 @@ protected:
 	void EnhancedInputFight(const FInputActionValue& Value); //Attack
 	void EnhancedInputParry(const FInputActionValue& Value); //Parrying
 	void ParryEnd(); //Timer callback 
-
-	// 상호작용 함수(경일)
-	void EnhancedInputInteraction(const FInputActionValue& Value);; // Interaction
 
 	UFUNCTION()
 	void OnAttackHitBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

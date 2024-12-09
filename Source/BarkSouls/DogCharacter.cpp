@@ -46,11 +46,6 @@ ADogCharacter::ADogCharacter()
 		InputToParry = InputActionParry.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionInteraction(TEXT("/Game/Kwanik/Input/IA_Interaction.IA_Interaction"));
-	if (InputActionInteraction.Succeeded()) {
-		InputToParry = InputActionInteraction.Object;
-	}
-
 	//컨트롤러 방향에 회전하지 않도록
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -130,9 +125,7 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(InputToRunAndRoll, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputRunAndRoll);
 		EnhancedInputComponent->BindAction(InputToRunAndRoll, ETriggerEvent::Completed, this, &ADogCharacter::EnhancedInputRunReleased);
 		EnhancedInputComponent->BindAction(InputToFight, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputFight);
-		EnhancedInputComponent->BindAction(InputToInteraction, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputInteraction);
 	}
-
 }
 
 void ADogCharacter::SetCharacterState(EState NewState){
@@ -150,11 +143,10 @@ void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 		//Forward 및 Right 벡터 계산
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
+		
 		float CurrentSpeed = (CharacterState == EState::Run) ? runspeed : walkspeed;
 		AddMovementInput(ForwardDirection, MovementVector.Y * CurrentSpeed);
         AddMovementInput(RightDirection, MovementVector.X * CurrentSpeed);
-		
 	}
 }
 void ADogCharacter::EnhancedInputWalkReleased(const FInputActionValue& Value){
@@ -225,11 +217,6 @@ void ADogCharacter::EnhancedInputParry(const FInputActionValue& Value){
 	CharacterState = EState::Parry;
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADogCharacter::ParryEnd, 0.3f, false);
 	//패링 성공시 코드 추가  
-}
-
-void ADogCharacter::EnhancedInputInteraction(const FInputActionValue& Value)
-{
-	UE_LOG(LogTemp, Warning, TEXT("EnhancedInputInteraction"));
 }
 
 void ADogCharacter::ParryEnd(){
