@@ -46,9 +46,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Component")
 	class UMapResetComponent* MapResetComponent;
 
-	// 화톳불 위치 데이터
-	static TMap<FName, FTransform> BonfireLocations;
-
 	// 화톳불 등록 여부
 	UPROPERTY(EditAnywhere, Category = "Bonfire")
 	bool bIsRegistered;
@@ -84,6 +81,9 @@ private:
 	void HideBonfireUI();
 
 public:
+	// 화톳불 위치 데이터
+	static TMap<FName, FTransform> BonfireLocations;
+
 	// 화톳불 상화작용                   
 	UFUNCTION()
 	void Interact();
