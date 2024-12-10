@@ -194,6 +194,7 @@ void ADogCharacter::EnhancedInputFight(const FInputActionValue& Value){
 	// UE_LOG(LogTemp, Display, TEXT("Input Value: %f"), inputValue); //부정을 통해 오른쪽 왼쪽 값 분리함
 
 	PressAtk(inputValue);
+	DisableAttackHitBox();
 	SetCharacterState(EState::Ready);
 }
 void ADogCharacter::PressAtk(float inputValue)
@@ -215,7 +216,6 @@ void ADogCharacter::PressAtk(float inputValue)
 
 		EnableAttackHitBox();
 	}
-	//else{}
 }
 
 void ADogCharacter::EnhancedInputParry(const FInputActionValue& Value){
@@ -227,8 +227,9 @@ void ADogCharacter::EnhancedInputParry(const FInputActionValue& Value){
 void ADogCharacter::ParryEnd(){
 	CharacterState = EState::Ready;
 }
+
 float ADogCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser){
-	float ActualDamage = Super::Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	Health -= ActualDamage;
 
 	if(Health <= 0.0f){
