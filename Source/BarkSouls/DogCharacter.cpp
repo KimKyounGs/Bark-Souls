@@ -8,6 +8,7 @@
 #include "TimerManager.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "DB.h"
 
 #include "DogCharacter.h"
 
@@ -77,7 +78,7 @@ ADogCharacter::ADogCharacter()
 	AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); //기본: 비활성화
 	AttackHitBox->SetCollisionResponseToAllChannels(ECR_Ignore);
 	AttackHitBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-
+	
 }
 
 // Called when the game starts or when spawned
