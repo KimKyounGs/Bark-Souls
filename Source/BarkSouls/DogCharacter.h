@@ -118,5 +118,4 @@ protected:
 
 	//데미지 시스템 :: 미구현 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	//void ApplyDamageToEnemy(AActor* Enemy, float Damage);
 };
