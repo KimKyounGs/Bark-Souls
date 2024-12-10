@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 
 UENUM(BlueprintType)
-enum class DamageType : uint8
+enum class CDamageType : uint8
 {
 	heavyDamage UMETA(DisplayName = "heavyDamage"), 
 	LightDamage UMETA(DisplayName = "LightDamage")

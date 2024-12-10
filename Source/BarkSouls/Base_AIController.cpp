@@ -35,3 +35,8 @@ void ABase_AIController::ChangeStateAttack()
 {
     GetBlackboardComponent()->SetValueAsEnum(TEXT("State"),static_cast<uint8>(EAIStateType::AttackStart));
 }
+
+void ABase_AIController::RemoveAttackList()
+{
+    GetBlackboardComponent()->SetValueAsBool(TEXT("RegisterAttackList"),false);
+}

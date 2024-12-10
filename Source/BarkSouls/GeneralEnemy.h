@@ -30,6 +30,7 @@ class BARKSOULS_API AGeneralEnemy : public AEnemyBase, public IGeneralEnemyAII
 
 	FTimerHandle AttackTimerHandle;
 
+	bool Attacking = false;
 public:
 	AGeneralEnemy();
 

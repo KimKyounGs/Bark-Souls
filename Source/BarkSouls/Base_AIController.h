@@ -26,6 +26,8 @@ public:
 
 	void ChangeStateAttack();
 
+	void RemoveAttackList();
+
 	UPROPERTY(BlueprintReadOnly)
 	bool AttackReady = false;
 
