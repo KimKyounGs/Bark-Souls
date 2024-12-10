@@ -38,7 +38,7 @@ void AGeneralEnemy::Tick(float DeltaTime)
 }
 void AGeneralEnemy::OnAttackEnded()
 {
-    GetCharacterMovement()->MaxWalkSpeed = 100;
+    GetCharacterMovement()->MaxWalkSpeed = 120;
     APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(),0);
     UAttackTokenComponent* PlayerAttackTokenComponent = Cast<UAttackTokenComponent>(Player->GetComponentByClass(UAttackTokenComponent::StaticClass()));
     PlayerAttackTokenComponent->ReturnAttackToken();
