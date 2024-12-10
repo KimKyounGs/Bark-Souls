@@ -39,6 +39,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+private:
+	UPROPERTY(EditAnywhere, Category = "Bonfire")
+	FName currentBonfireID;
 
 public:
 	UPROPERTY(VisibleAnywhere, Category=Camera)
@@ -118,4 +121,12 @@ protected:
 
 	//데미지 시스템 :: 미구현 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+
+public:
+	// 화톳불 관련 함수
+	// 최근 화톳불 ID 저장 함수
+	void SetCurrentBonfireID(const FName BonfireID);
+
+	void TeleportPlayer(const FTransform TargetTransform);
 };

@@ -252,3 +252,17 @@ void ADogCharacter::OnAttackHitBoxBeginOverlap(UPrimitiveComponent* OverlappedCo
 		UE_LOG(LogTemp, Display, TEXT("Hit: %s"), *OtherActor->GetName());
 	}
 }
+
+void ADogCharacter::SetCurrentBonfireID(const FName BonfireID)
+{
+	currentBonfireID = BonfireID;
+}
+
+void ADogCharacter::TeleportPlayer(const FTransform TargetTransform)
+{
+	// 위치 설정
+	SetActorLocation(TargetTransform.GetLocation());
+
+	// 회전 설정
+	SetActorRotation(TargetTransform.GetRotation().Rotator());
+}

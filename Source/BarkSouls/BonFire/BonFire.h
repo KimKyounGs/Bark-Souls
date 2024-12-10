@@ -6,13 +6,33 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "MapResetComponent.h"
+#include "BarkSouls/DogCharacter.h"
 #include "Bonfire.generated.h"
 
 UCLASS()
 class BARKSOULS_API ABonfire : public AActor
 {
 	GENERATED_BODY()
+protected:
+	virtual void BeginPlay() override;
 
+public:
+	ABonfire();
+	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
+		class AActor* OtherActor,
+		class UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
+		class AActor* OtherActor,
+		class UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex);
 private:
 	// 화톳불 메시
 	UPROPERTY(EditAnywhere, Category = "Component")
@@ -41,6 +61,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "State")
 	bool bPlayerInRange;
 
+	UPROPERTY(EditAnywhere, Category = "State")
+	bool bUsingBonfire;
+
 	// UI 위젯 클래스
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<class UBonfireUI> BonfireWidgetClass;
@@ -49,43 +72,36 @@ private:
 	UPROPERTY()
 	class UBonfireUI* BonfireWidget;
 
+	ADogCharacter* Player;
+	// 나중에 고치기
+	APlayerController* PlayerController;
+
 private:
-	// 다른 화톳불로 순간이동
-	UFUNCTION(BlueprintCallable, Category = "Bonfire")
-	void TeleportPlayer(AActor* Player, FName TargetBonfireID);
-
-	// 화톳불 위치 등록 -> 화톳불과 상호작용을 해야함 ID가 등록됨.
+	// 화톳불 위치 등록 -> 화톳불과 상호작용을 해야 ID가 등록됨.
 	void RegisterBonfireLocation();
-
-protected:
-	virtual void BeginPlay() override;
-
-public:
-	ABonfire();
-	virtual void Tick(float DeltaTime) override;
-
-	UFUNCTION()
-	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
-		class AActor* OtherActor,
-		class UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult);
-
-	UFUNCTION()
-	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
-		class AActor* OtherActor,
-		class UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex);
-
-	// 화톳불 상화작용
-	UFUNCTION()
-	void Interact();
-
-	// 플레이어와 상호작용
+	// UI
 	void ShowBonfireUI();
 	void HideBonfireUI();
 
-	void ShowMessage(FString Message);
+public:
+	// 화톳불 상화작용                   
+	UFUNCTION()
+	void Interact();
 
+	// 다른 화톳불로 순간이동
+	UFUNCTION(BlueprintCallable, Category = "Bonfire")
+	void TeleportPlayer(FName TargetBonfireID);
+
+	// UI 버튼
+	UFUNCTION()
+	void OnRest();
+
+	UFUNCTION()
+	void OnTeleport();
+
+	UFUNCTION()
+	void OnLeave();
+
+	// 디버깅 용 함수
+	void ShowMessage(FString Message);
 };
