@@ -46,6 +46,7 @@ void UAttackTokenComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 void UAttackTokenComponent::ReturnAttackToken()
 {
+	AttackReserveList[0]->RemoveAttackList();
 	AttackReserveList.RemoveAt(0);
 	AttackTokenCount += 1;
 

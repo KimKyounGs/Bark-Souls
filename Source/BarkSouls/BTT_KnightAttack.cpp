@@ -15,7 +15,7 @@ EBTNodeResult::Type UBTT_KnightAttack::ExecuteTask(UBehaviorTreeComponent &Owner
 {
     Super::ExecuteTask(OwnerComp,NodeMemory);
 
-        if(OwnerComp.GetAIOwner() == nullptr)
+    if(OwnerComp.GetAIOwner() == nullptr)
     {
         return EBTNodeResult::Failed;
     }
@@ -25,8 +25,17 @@ EBTNodeResult::Type UBTT_KnightAttack::ExecuteTask(UBehaviorTreeComponent &Owner
     {
         return EBTNodeResult::Failed;
     }
-    FAIMoveRequest MoveReq;
-
+    AGeneralEnemy* Enemy = Cast<AGeneralEnemy>(Owner);
+    if(Enemy == nullptr)
+    {
+        return EBTNodeResult::Failed;
+    }
+    Enemy->Attack();
+    OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("HasAttackToken"),false);
+    OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("RegisterAttackList"),false);
+    OwnerComp.GetBlackboardComponent()->SetValueAsEnum(TEXT("State"), static_cast<uint8>(EAIStateType::AttackIdle));
+    /*FAIMoveRequest MoveReq;
+    
     AActor* AttackTarget = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(GetSelectedBlackboardKey()));
 
     MoveReq.SetGoalActor(AttackTarget);
@@ -44,7 +53,7 @@ EBTNodeResult::Type UBTT_KnightAttack::ExecuteTask(UBehaviorTreeComponent &Owner
         OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("HasAttackToken"),false);
         OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("RegisterAttackList"),false);
         OwnerComp.GetBlackboardComponent()->SetValueAsEnum(TEXT("State"), static_cast<uint8>(EAIStateType::AttackIdle));
-    }
+    }*/
 
     return EBTNodeResult::Succeeded;
 }

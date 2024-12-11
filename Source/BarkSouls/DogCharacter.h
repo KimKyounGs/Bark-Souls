@@ -39,6 +39,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+private:
+	UPROPERTY(EditAnywhere, Category = "Bonfire")
+	FName currentBonfireID;
 
 public:
 	UPROPERTY(VisibleAnywhere, Category=Camera)
@@ -53,6 +56,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
 	class UAnimMontage* HAttackMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
+	class UAnimMontage* RollingMontage;
+
 	void PressAtk(float inputValue);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Attack")
@@ -61,7 +67,7 @@ public:
 
 protected:
 	float walkspeed = 0.5f;
-	float runspeed = 0.75f;
+	float runspeed = 1.0f;
 
 	float Health = 100.0f;
 
@@ -105,6 +111,7 @@ protected:
 	void EnhancedInputFight(const FInputActionValue& Value); //Attack
 	void EnhancedInputParry(const FInputActionValue& Value); //Parrying
 	void ParryEnd(); //Timer callback 
+
 	UFUNCTION()
 	void OnAttackHitBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
@@ -114,5 +121,12 @@ protected:
 
 	//데미지 시스템 :: 미구현 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	//void ApplyDamageToEnemy(AActor* Enemy, float Damage);
+
+
+public:
+	// 화톳불 관련 함수
+	// 최근 화톳불 ID 저장 함수
+	void SetCurrentBonfireID(const FName BonfireID);
+
+	void TeleportPlayer(const FTransform TargetTransform);
 };

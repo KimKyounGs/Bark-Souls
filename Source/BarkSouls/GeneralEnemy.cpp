@@ -5,13 +5,17 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AttackTokenComponent.h"
 #include "Kismet/GameplayStatics.h"
-
+#include "Components/CapsuleComponent.h"
 
 AGeneralEnemy::AGeneralEnemy()
 {
     GetCharacterMovement()->GetNavMovementProperties()->bUseAccelerationForPaths = true;
     GetCharacterMovement()->MaxWalkSpeed = 400.f;
     AttackTokenComponent = CreateDefaultSubobject<UAttackTokenComponent>(TEXT("AttackTokenComponent"));
+
+    GetCapsuleComponent()->SetCollisionProfileName("CapsuleEnemy");
+    
+    GetMesh()->SetCollisionProfileName("MeshEnemy");
 }
 
 APatrolRoute *AGeneralEnemy::GetPatrolRoute() const
@@ -38,15 +42,19 @@ void AGeneralEnemy::Tick(float DeltaTime)
 }
 void AGeneralEnemy::OnAttackEnded()
 {
-    GetCharacterMovement()->MaxWalkSpeed = 100;
-    APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(),0);
-    UAttackTokenComponent* PlayerAttackTokenComponent = Cast<UAttackTokenComponent>(Player->GetComponentByClass(UAttackTokenComponent::StaticClass()));
-    PlayerAttackTokenComponent->ReturnAttackToken();
+    GetCharacterMovement()->MaxWalkSpeed = 120;
+    Attacking = false;
 }
 
 void AGeneralEnemy::Attack()
 {
     float AttackDelay = PlayAnimMontage(AttackAnim);
+    Attacking = true;
+
+    APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(),0);
+    UAttackTokenComponent* PlayerAttackTokenComponent = Cast<UAttackTokenComponent>(Player->GetComponentByClass(UAttackTokenComponent::StaticClass()));
+    PlayerAttackTokenComponent->ReturnAttackToken(); 
+
     GetWorld()->GetTimerManager().SetTimer(AttackTimerHandle,this,&AGeneralEnemy::OnAttackEnded, AttackDelay,false);
     GetCharacterMovement()->MaxWalkSpeed = 0;    
 

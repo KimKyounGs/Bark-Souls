@@ -8,6 +8,7 @@
 #include "TimerManager.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "DB.h"
 
 #include "DogCharacter.h"
 
@@ -42,7 +43,7 @@ ADogCharacter::ADogCharacter()
 	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionParry(TEXT("/Game/Kwanik/Input/IA_Parry.IA_Parry"));
-	if(InputActionFight.Succeeded()){
+	if(InputActionParry.Succeeded()){
 		InputToParry = InputActionParry.Object;
 	}
 
@@ -77,7 +78,7 @@ ADogCharacter::ADogCharacter()
 	AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); //기본: 비활성화
 	AttackHitBox->SetCollisionResponseToAllChannels(ECR_Ignore);
 	AttackHitBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-
+	
 }
 
 // Called when the game starts or when spawned
@@ -126,7 +127,6 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(InputToRunAndRoll, ETriggerEvent::Completed, this, &ADogCharacter::EnhancedInputRunReleased);
 		EnhancedInputComponent->BindAction(InputToFight, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputFight);
 	}
-
 }
 
 void ADogCharacter::SetCharacterState(EState NewState){
@@ -144,11 +144,10 @@ void ADogCharacter::EnhancedInputMove(const FInputActionValue& Value){
 		//Forward 및 Right 벡터 계산
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
+		
 		float CurrentSpeed = (CharacterState == EState::Run) ? runspeed : walkspeed;
 		AddMovementInput(ForwardDirection, MovementVector.Y * CurrentSpeed);
         AddMovementInput(RightDirection, MovementVector.X * CurrentSpeed);
-		
 	}
 }
 void ADogCharacter::EnhancedInputWalkReleased(const FInputActionValue& Value){
@@ -156,13 +155,18 @@ void ADogCharacter::EnhancedInputWalkReleased(const FInputActionValue& Value){
 }
 void ADogCharacter::EnhancedInputRunAndRoll(const FInputActionValue& Value){
 	FVector CurrentVelocity = GetVelocity(); //ACharacter 함수
-	UE_LOG(LogTemp, Display, TEXT("Velocity: %s"), *CurrentVelocity.ToString());
-	UE_LOG(LogTemp, Display, TEXT("Speed: %f"), CurrentVelocity.Size()); //정상적으로 0 출력됨 문제 확인해 볼 것
+	// UE_LOG(LogTemp, Display, TEXT("Velocity: %s"), *CurrentVelocity.ToString());
+	// UE_LOG(LogTemp, Display, TEXT("Speed: %f"), CurrentVelocity.Size()); //정상적으로 0 출력됨 문제 확인해 볼 것
 
 	if(CharacterState == EState::Ready || CharacterState == EState::Walk){ //구르기
+		UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+		if(animInstance->IsAnyMontagePlaying()){
+			return; // 이미 공격중에는 연속 입력이 안되기 위함 
+		}
 		SetCharacterState(EState::Roll);
 		if(CurrentVelocity.Size()){
 			LaunchCharacter(CurrentVelocity*5, false, false);
+			animInstance->Montage_Play(RollingMontage);
 		}
 		else { //제자리에서 깡총깡총
 			LaunchCharacter(FVector(-10, 0, 0), true, false);
@@ -188,9 +192,10 @@ void ADogCharacter::EnhancedInputLook(const FInputActionValue& Value){
 //공격 모션 12번째 트라이
 void ADogCharacter::EnhancedInputFight(const FInputActionValue& Value){
 	float inputValue = Value.Get<float>();
-	UE_LOG(LogTemp, Display, TEXT("Input Value: %f"), inputValue); //부정을 통해 오른쪽 왼쪽 값 분리함
+	// UE_LOG(LogTemp, Display, TEXT("Input Value: %f"), inputValue); //부정을 통해 오른쪽 왼쪽 값 분리함
 
 	PressAtk(inputValue);
+	DisableAttackHitBox();
 	SetCharacterState(EState::Ready);
 }
 void ADogCharacter::PressAtk(float inputValue)
@@ -212,7 +217,6 @@ void ADogCharacter::PressAtk(float inputValue)
 
 		EnableAttackHitBox();
 	}
-	//else{}
 }
 
 void ADogCharacter::EnhancedInputParry(const FInputActionValue& Value){
@@ -220,11 +224,13 @@ void ADogCharacter::EnhancedInputParry(const FInputActionValue& Value){
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADogCharacter::ParryEnd, 0.3f, false);
 	//패링 성공시 코드 추가  
 }
+
 void ADogCharacter::ParryEnd(){
 	CharacterState = EState::Ready;
 }
+
 float ADogCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser){
-	float ActualDamage = Super::Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	Health -= ActualDamage;
 
 	if(Health <= 0.0f){
@@ -245,4 +251,18 @@ void ADogCharacter::OnAttackHitBoxBeginOverlap(UPrimitiveComponent* OverlappedCo
 		UGameplayStatics::ApplyDamage(OtherActor, 20.0f, GetController(), this, nullptr);
 		UE_LOG(LogTemp, Display, TEXT("Hit: %s"), *OtherActor->GetName());
 	}
+}
+
+void ADogCharacter::SetCurrentBonfireID(const FName BonfireID)
+{
+	currentBonfireID = BonfireID;
+}
+
+void ADogCharacter::TeleportPlayer(const FTransform TargetTransform)
+{
+	// 위치 설정
+	SetActorLocation(TargetTransform.GetLocation());
+
+	// 회전 설정
+	SetActorRotation(TargetTransform.GetRotation().Rotator());
 }
