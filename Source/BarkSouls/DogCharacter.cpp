@@ -169,7 +169,8 @@ void ADogCharacter::EnhancedInputRunAndRoll(const FInputActionValue& Value){
 			animInstance->Montage_Play(RollingMontage);
 		}
 		else { //제자리에서 깡총깡총
-			LaunchCharacter(FVector(-10, 0, 0), true, false);
+			FVector ReverseDirection = -GetActorForwardVector();
+			LaunchCharacter(ReverseDirection*600, true, false);
 		}
 		SetCharacterState(EState::Run);
 	}
