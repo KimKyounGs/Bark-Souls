@@ -1,37 +1,34 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "BonfireTypes.h"
+#include "Components/Button.h"
 #include "BonfireTeleportUI.generated.h"
 
-/**
- * 화톳불 전송 UI 클래스
- */
 UCLASS()
 class BARKSOULS_API UBonfireTeleportUI : public UUserWidget
 {
     GENERATED_BODY()
 
-private:
-    // ScrollBox: 활성화된 화톳불 리스트 표시
-    UPROPERTY(meta = (BindWidget))
-    class UScrollBox* ScrollBox_BonfireList;
-
-    // 부모 화톳불 객체
-    class ABonfire* OwningBonfire;
-
 public:
-    // OwningBonfire를 설정
-    void Initialize(ABonfire* InOwningBonfire);
+    // ScrollBox에 추가된 버튼들
+    UPROPERTY(meta = (BindWidget))
+    class UScrollBox* BonfireList;
 
-    // UI를 채우는 함수
-    void PopulateBonfireList();
+    // 버튼과 ID를 매핑
+    TMap<UButton*, FName> ButtonIDMap;
+
+    // 화톳불 UI 초기화 함수
+    UFUNCTION(BlueprintCallable)
+    void InitializeTeleportUI(const TMap<FName, FBonfireData>& ActiveBonfires);
+
+    // 버튼 클릭 이벤트 함수
+    UFUNCTION()
+    void OnBonfireClicked();
 
 protected:
-    // UI 생성 시 초기화
-    virtual void NativeConstruct() override;
-
-    // 화톳불 선택 시 호출
-    UFUNCTION()
-    void HandleBonfireClicked(FName SelectedBonfireID);
+    virtual void NativeConstruct() override; // 초기화
 };

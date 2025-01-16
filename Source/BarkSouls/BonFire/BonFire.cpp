@@ -6,9 +6,9 @@
 #include "Blueprint/UserWidget.h"
 
 // 정적 변수 초기화
-TMap<FName, FTransform> ABonfire::BonfireLocations;
+TMap<FName, FBonfireData> ABonfire::StaticActiveBonfires;
 
-ABonfire::ABonfire() : bIsRegistered(false), bPlayerInRange(false), bUsingBonfire(false)
+ABonfire::ABonfire() : bPlayerInRange(false), bUsingBonfire(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -43,6 +43,12 @@ void ABonfire::BeginPlay()
 			ShowMessage(TEXT("NO Controller"));
 		}
 	}
+
+	Player = Cast<ADogCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (!Player)
+	{
+		ShowMessage(TEXT("Player not found"));
+	}
 	InteractionBox->OnComponentBeginOverlap.AddDynamic(this, &ABonfire::OnOverlapBegin);
 	InteractionBox->OnComponentEndOverlap.AddDynamic(this, &ABonfire::OnOverlapEnd);
 }
@@ -62,7 +68,8 @@ void ABonfire::Tick(float DeltaTime)
 
 void ABonfire::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherActor != this)
+	//if (OtherActor && OtherActor->IsA(ADogCharacter::StaticClass()))
+	if (OtherActor)
 	{
 		bPlayerInRange = true;
 		ShowMessage(TEXT("Press E"));
@@ -81,10 +88,10 @@ void ABonfire::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 
 void ABonfire::Interact()
 {
-	if (!bIsRegistered) // 아직 등록되지 않은 경우
+	if (!BonfireData.bIsActivated) // 아직 등록되지 않은 경우
 	{
 		RegisterBonfireLocation();
-		bIsRegistered = true; // 등록 상태로 변경
+		BonfireData.bIsActivated = true; // 등록 상태로 변경
 		ShowMessage(TEXT("Bonfire activate"));
 	}
 	else
@@ -118,7 +125,7 @@ void ABonfire::ShowBonfireUI()
 		// 4. 게임 일시 정지
 		UGameplayStatics::SetGamePaused(this, true);
 
-		ShowMessage("Good");
+		ShowMessage("ShowBonfireUI");
 	}
 }
 
@@ -140,15 +147,15 @@ void ABonfire::HideBonfireUI()
 		// 4. 게임 재개
 		UGameplayStatics::SetGamePaused(this, false);
 
-		ShowMessage("Bad");
+		ShowMessage("HideBonfireUI");
 	}
 }
 
 void ABonfire::RegisterBonfireLocation()
 {
-	if (!BonfireID.IsNone())
+	if (!BonfireData.BonfireID.IsNone())
 	{
-		BonfireLocations.Add(BonfireID, GetActorTransform());
+		StaticActiveBonfires.Add(BonfireData.BonfireID, BonfireData);
 	}
 }
 
@@ -170,14 +177,27 @@ void ABonfire::OnLeave()
 
 void ABonfire::TeleportPlayer(FName TargetBonfireID)
 {
-	if (!BonfireLocations.Contains(TargetBonfireID))
+	if (!StaticActiveBonfires.Contains(TargetBonfireID))
 	{
 		ShowMessage("NO ID Bonfire");
 		return;
 	}
 
-	FTransform TargetTransform = BonfireLocations[TargetBonfireID];
-	Player->TeleportPlayer(TargetTransform);
+	const FBonfireData& TargetBonfire = StaticActiveBonfires[TargetBonfireID];
+	
+	// 현재 맵과 이동할 맵 비교
+	if (TargetBonfire.MapName != FName(*GetWorld()->GetMapName()))
+	{
+		// 다른 맵으로 이동
+		UGameplayStatics::OpenLevel(this, TargetBonfire.MapName);
+
+		// OpenLevel 후, 맵이 로드되면 플레이어 위치를 조정
+	}
+	else
+	{
+		// 같은 맵 내 텔레포트
+		Player->SetActorTransform(TargetBonfire.BonfireTransform);
+	}
 }
 
 void ABonfire::ShowMessage(FString Message)

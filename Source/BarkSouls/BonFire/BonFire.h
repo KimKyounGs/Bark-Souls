@@ -7,6 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "MapResetComponent.h"
 #include "BarkSouls/DogCharacter.h"
+#include "BonfireTypes.h"
 #include "Bonfire.generated.h"
 
 UCLASS()
@@ -46,13 +47,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Component")
 	class UMapResetComponent* MapResetComponent;
 
-	// 화톳불 등록 여부
+	// 화톳불 데이터
 	UPROPERTY(EditAnywhere, Category = "Bonfire")
-	bool bIsRegistered;
-
-	// 현재 화톳불 ID
-	UPROPERTY(EditAnywhere, Category = "Bonfire")
-	FName BonfireID;
+	FBonfireData BonfireData;
 
 	// 플레이어가 범위 내에 있는지 여부
 	UPROPERTY(EditAnywhere, Category = "State")
@@ -82,7 +79,7 @@ private:
 
 public:
 	// 화톳불 위치 데이터
-	static TMap<FName, FTransform> BonfireLocations;
+	static TMap<FName, FBonfireData> StaticActiveBonfires;
 
 	// 화톳불 상화작용                   
 	UFUNCTION()
@@ -92,7 +89,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Bonfire")
 	void TeleportPlayer(FName TargetBonfireID);
 
-	// UI 버튼
+	// UI 버튼과 연결된 함수들.
 	UFUNCTION()
 	void OnRest();
 
