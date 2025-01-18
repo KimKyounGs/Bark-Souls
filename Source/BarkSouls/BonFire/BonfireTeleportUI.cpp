@@ -1,73 +1,138 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "BonfireTeleportUI.h"
 #include "Components/Button.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
-#include "Bonfire.h"
 #include "Kismet/GameplayStatics.h"
 
-void UBonfireTeleportUI::NativeConstruct()
+void UBonfireTeleportUI::InitializeUI(const TMap<FName, FBonfireData>& InActiveBonfires)
 {
-    Super::NativeConstruct();
+    // LevelBonfireMap 초기화
+    LevelBonfireMap.Empty();
 
-    // 초기화 작업 (필요하면 작성)
-}
-
-void UBonfireTeleportUI::InitializeTeleportUI(const TMap<FName, FBonfireData>& ActiveBonfires)
-{
-    if (!BonfireList)
+    // `TMap<FName, FBonfireData>`를 `TMap<FName, TArray<FBonfireData>>` 형식으로 변환
+    for (const TPair<FName, FBonfireData>& Pair : InActiveBonfires)
     {
-        UE_LOG(LogTemp, Warning, TEXT("BonfireList is not bound!"));
-        return;
+        const FName& MapName = Pair.Value.MapName;
+        if (!LevelBonfireMap.Contains(MapName))
+        {
+            LevelBonfireMap.Add(MapName, {});
+        }
+        
+        LevelBonfireMap[MapName].Add(Pair.Value);
     }
 
+
+    // Stage 버튼 클릭 이벤트 연결
+    if (Stage1Button)
+    {
+        Stage1Button->OnClicked.AddDynamic(this, &UBonfireTeleportUI::OnStage1ButtonClicked);
+    }
+
+    if (Stage2Button)
+    {
+        Stage2Button->OnClicked.AddDynamic(this, &UBonfireTeleportUI::OnStage2ButtonClicked);
+    }
+
+    if (Stage3Button)
+    {
+        Stage3Button->OnClicked.AddDynamic(this, &UBonfireTeleportUI::OnStage3ButtonClicked);
+    }
+}
+
+void UBonfireTeleportUI::OnStage1ButtonClicked()
+{
+    if (LevelBonfireMap.Contains("Stage1"))
+    {
+        PopulateBonfireList(LevelBonfireMap["Stage1"]);
+    }
+}
+
+void UBonfireTeleportUI::OnStage2ButtonClicked()
+{
+    if (LevelBonfireMap.Contains("Stage2"))
+    {
+        PopulateBonfireList(LevelBonfireMap["Stage2"]);
+    }
+}
+
+void UBonfireTeleportUI::OnStage3ButtonClicked()
+{
+    if (LevelBonfireMap.Contains("Stage3"))
+    {
+        PopulateBonfireList(LevelBonfireMap["Stage3"]);
+    }
+}
+
+void UBonfireTeleportUI::PopulateBonfireList(const TArray<FBonfireData>& Bonfires)
+{
     BonfireList->ClearChildren(); // 기존 버튼 제거
 
-    for (const TPair<FName, FBonfireData>& Bonfire : ActiveBonfires)
+    for (const FBonfireData& Bonfire : Bonfires)
     {
-        FName BonfireID = Bonfire.Key;
-        const FBonfireData& Data = Bonfire.Value;
+        if (!Bonfire.bIsActivated)
+        {
+            continue; // 활성화되지 않은 화톳불은 무시
+        }
 
         // 버튼 생성
-        UButton* NewButton = NewObject<UButton>(this);
-        UTextBlock* ButtonLabel = NewObject<UTextBlock>(NewButton);
+        UButton* BonfireButton = NewObject<UButton>(this);
+        UTextBlock* ButtonText = NewObject<UTextBlock>(BonfireButton);
 
-        // 버튼에 텍스트 추가
-        ButtonLabel->SetText(FText::FromName(Data.BonfireName));
-        NewButton->AddChild(ButtonLabel);
+        ButtonText->SetText(FText::FromName(Bonfire.BonfireName));
+        BonfireButton->AddChild(ButtonText);
 
-        // 버튼을 ScrollBox에 추가
-        BonfireList->AddChild(NewButton);
+        BonfireList->AddChild(BonfireButton);
 
-        // Delegate 연결
-        NewButton->OnClicked.AddDynamic(this, &UBonfireTeleportUI::OnBonfireClicked);
+        // Delegate 바인딩
+        BonfireButton->OnClicked.AddDynamic(this, &UBonfireTeleportUI::OnBonfireButtonClicked);
 
         // 버튼과 BonfireID 매핑
-        ButtonIDMap.Add(NewButton, BonfireID);
+        ButtonToBonfireIDMap.Add(BonfireButton, Bonfire.BonfireID);
     }
 }
 
-void UBonfireTeleportUI::OnBonfireClicked()
+void UBonfireTeleportUI::OnBonfireButtonClicked()
 {
-    //// 현재 클릭된 버튼 가져오기
-    //UButton* ClickedButton = Cast<UButton>(GetOwningPlayer()->GetLastInputPressedWidget());
-    //if (ClickedButton && ButtonIDMap.Contains(ClickedButton))
-    //{
-    //    FName BonfireID = ButtonIDMap[ClickedButton];
+    // 클릭된 버튼 확인
+    for (const TPair<UButton*, FName>& Pair : ButtonToBonfireIDMap)
+    {
+        if (Pair.Key->IsPressed()) // IsPressed()로 현재 눌린 버튼 확인
+        {
+            FName BonfireID = Pair.Value;
+            UE_LOG(LogTemp, Log, TEXT("Clicked Bonfire ID: %s"), *BonfireID.ToString());
+            TeleportToBonfire(BonfireID); // BonfireID를 사용하여 동작 실행
+            return;
+        }
+    }
+}
 
-    //    // 화톳불 ID를 로그로 출력
-    //    UE_LOG(LogTemp, Log, TEXT("Bonfire selected: %s"), *BonfireID.ToString());
+void UBonfireTeleportUI::TeleportToBonfire(FName BonfireID)
+{
+    for (const TPair<FName, TArray<FBonfireData>>& LevelData : LevelBonfireMap)
+    {
+        for (const FBonfireData& Bonfire : LevelData.Value)
+        {
+            if (Bonfire.BonfireID == BonfireID)
+            {
+                if (Bonfire.MapName != FName(*GetWorld()->GetMapName()))
+                {
+                    // 레벨 변경
+                    UGameplayStatics::OpenLevel(this, Bonfire.MapName);
+                }
+                else
+                {
+                    // 같은 레벨에서 위치 이동
+                    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+                    if (PlayerController && PlayerController->GetPawn())
+                    {
+                        PlayerController->GetPawn()->SetActorTransform(Bonfire.BonfireTransform);
+                    }
+                }
 
-    //    // 실제 동작 (예: 텔레포트) 추가
-    //    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
-    //    if (PlayerController)
-    //    {
-    //        ABonfire* BonfireActor = Cast<ABonfire>(PlayerController->GetPawn());
-    //        if (BonfireActor)
-    //        {
-    //            BonfireActor->TeleportPlayer(BonfireID);
-    //        }
-    //    }
-    //}
+                return;
+            }
+        }
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("Bonfire ID not found: %s"), *BonfireID.ToString());
 }

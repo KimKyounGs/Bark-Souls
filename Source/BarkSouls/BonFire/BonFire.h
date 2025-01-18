@@ -63,8 +63,15 @@ private:
 	TSubclassOf<class UBonfireUI> BonfireWidgetClass;
 
 	// 생성된 UI 위젯 인스턴스
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category = "UI")
 	class UBonfireUI* BonfireWidget;
+
+	// Teleport UI 클래스 타입
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UBonfireTeleportUI> TeleportUIClass;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	class UBonfireTeleportUI* TeleportUI;
 
 	ADogCharacter* Player;
 	// 나중에 고치기
@@ -84,10 +91,6 @@ public:
 	// 화톳불 상화작용                   
 	UFUNCTION()
 	void Interact();
-
-	// 다른 화톳불로 순간이동
-	UFUNCTION(BlueprintCallable, Category = "Bonfire")
-	void TeleportPlayer(FName TargetBonfireID);
 
 	// UI 버튼과 연결된 함수들.
 	UFUNCTION()

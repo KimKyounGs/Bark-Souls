@@ -3,6 +3,7 @@
 #include "Bonfire.h"
 #include "Kismet/GameplayStatics.h"
 #include "BonfireUI.h"
+#include "BonfireTeleportUI.h"
 #include "Blueprint/UserWidget.h"
 
 // 정적 변수 초기화
@@ -20,22 +21,26 @@ ABonfire::ABonfire() : bPlayerInRange(false), bUsingBonfire(false)
 
 	MapResetComponent = CreateDefaultSubobject<UMapResetComponent>(TEXT("MapResetComponet"));
 
+	BonfireData.bIsActivated = false;
+
 }
 
 void ABonfire::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 컨트롤러 초기화.
 	PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 	if (BonfireWidgetClass)
 	{
 		if (PlayerController)
 		{
 			BonfireWidget = CreateWidget<UBonfireUI>(PlayerController, BonfireWidgetClass);
+			TeleportUI = CreateWidget<UBonfireTeleportUI>(PlayerController, TeleportUIClass);
 			if (BonfireWidget)
 			{
 				BonfireWidget->AddToViewport();
 				BonfireWidget->SetVisibility(ESlateVisibility::Hidden);
-
 			}
 		}
 		else
@@ -44,11 +49,19 @@ void ABonfire::BeginPlay()
 		}
 	}
 
+	// Player변수 초기화
 	Player = Cast<ADogCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 	if (!Player)
 	{
 		ShowMessage(TEXT("Player not found"));
 	}
+	
+	// 월드 정보나 다른 액터에 의존한 위치 초기화
+	if (!BonfireData.BonfireTransform.IsValid())
+	{
+		BonfireData.BonfireTransform = GetActorTransform(); // 현재 액터의 Transform으로 초기화
+	}
+
 	InteractionBox->OnComponentBeginOverlap.AddDynamic(this, &ABonfire::OnOverlapBegin);
 	InteractionBox->OnComponentEndOverlap.AddDynamic(this, &ABonfire::OnOverlapEnd);
 }
@@ -166,38 +179,51 @@ void ABonfire::OnRest()
 
 void ABonfire::OnTeleport()
 {
-	ShowMessage("ABonfire::OnTeleport()");
+	if (!PlayerController)
+	{
+		ShowMessage("PlayerController not found!");
+		return;
+	}
+
+	// BonfireTeleportUI 클래스를 확인
+	if (!TeleportUIClass)
+	{
+		ShowMessage("TeleportUIClass is not set!");
+		return;
+	}
+
+	// BonfireTeleportUI 생성
+	if (TeleportUIClass)
+	{
+		// 활성화된 화톳불 데이터를 전달
+		TeleportUI->InitializeUI(StaticActiveBonfires);
+
+		// UI를 화면에 추가
+		TeleportUI->AddToViewport();
+
+		// 입력 모드 전환: UI 전용
+		FInputModeUIOnly InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		PlayerController->SetInputMode(InputMode);
+
+		// 마우스 커서를 보이게 설정
+		PlayerController->bShowMouseCursor = true;
+
+		// 게임 일시 정지
+		UGameplayStatics::SetGamePaused(this, true);
+
+		ShowMessage("Teleport UI opened.");
+	}
+	else
+	{
+		ShowMessage("Failed to create Teleport UI!");
+	}
 }
 
 void ABonfire::OnLeave()
 {
 	HideBonfireUI();
 	ShowMessage("ABonfire::OnLeave()");
-}
-
-void ABonfire::TeleportPlayer(FName TargetBonfireID)
-{
-	if (!StaticActiveBonfires.Contains(TargetBonfireID))
-	{
-		ShowMessage("NO ID Bonfire");
-		return;
-	}
-
-	const FBonfireData& TargetBonfire = StaticActiveBonfires[TargetBonfireID];
-	
-	// 현재 맵과 이동할 맵 비교
-	if (TargetBonfire.MapName != FName(*GetWorld()->GetMapName()))
-	{
-		// 다른 맵으로 이동
-		UGameplayStatics::OpenLevel(this, TargetBonfire.MapName);
-
-		// OpenLevel 후, 맵이 로드되면 플레이어 위치를 조정
-	}
-	else
-	{
-		// 같은 맵 내 텔레포트
-		Player->SetActorTransform(TargetBonfire.BonfireTransform);
-	}
 }
 
 void ABonfire::ShowMessage(FString Message)

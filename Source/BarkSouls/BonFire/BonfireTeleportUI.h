@@ -13,22 +13,49 @@ class BARKSOULS_API UBonfireTeleportUI : public UUserWidget
 {
     GENERATED_BODY()
 
-public:
-    // ScrollBox에 추가된 버튼들
+protected:
+    // Stage 버튼
+    UPROPERTY(meta = (BindWidget))
+    class UButton* Stage1Button;
+
+    UPROPERTY(meta = (BindWidget))
+    class UButton* Stage2Button;
+
+    UPROPERTY(meta = (BindWidget))
+    class UButton* Stage3Button;
+
+    // 화톳불 버튼 목록 표시
     UPROPERTY(meta = (BindWidget))
     class UScrollBox* BonfireList;
 
-    // 버튼과 ID를 매핑
-    TMap<UButton*, FName> ButtonIDMap;
+    // 레벨별 화톳불 데이터 (고정된 데이터)
+    TMap<FName, TArray<FBonfireData>> LevelBonfireMap;
 
-    // 화톳불 UI 초기화 함수
-    UFUNCTION(BlueprintCallable)
-    void InitializeTeleportUI(const TMap<FName, FBonfireData>& ActiveBonfires);
+    TMap<UButton*, FName> ButtonToBonfireIDMap;
 
-    // 버튼 클릭 이벤트 함수
+public:
+    // UI 초기화 함수
+    void InitializeUI(const TMap<FName, FBonfireData>& InLevelBonfireMap);
+
+    // Stage 버튼 클릭 함수
     UFUNCTION()
-    void OnBonfireClicked();
+    void OnStage1ButtonClicked();
+
+    UFUNCTION()
+    void OnStage2ButtonClicked();
+
+    UFUNCTION()
+    void OnStage3ButtonClicked();
+
+    // 화톳불 버튼 클릭 함수
+    UFUNCTION()
+    void OnBonfireButtonClicked();
+
 
 protected:
-    virtual void NativeConstruct() override; // 초기화
+    // 특정 Stage에 따라 화톳불 목록 갱신
+    void PopulateBonfireList(const TArray<FBonfireData>& Bonfires);
+
+    // 특정 Bonfire로 이동
+    void TeleportToBonfire(FName BonfireID);
 };
