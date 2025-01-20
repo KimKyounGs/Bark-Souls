@@ -6,8 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "MapResetComponent.h"
-#include "BarkSouls/DogCharacter.h"
 #include "BonfireTypes.h"
+#include "UIManager.h"
 #include "Bonfire.generated.h"
 
 UCLASS()
@@ -58,31 +58,16 @@ private:
 	UPROPERTY(EditAnywhere, Category = "State")
 	bool bUsingBonfire;
 
-	// UI 위젯 클래스
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<class UBonfireUI> BonfireWidgetClass;
-
-	// 생성된 UI 위젯 인스턴스
-	UPROPERTY(EditAnywhere, Category = "UI")
-	class UBonfireUI* BonfireWidget;
-
-	// Teleport UI 클래스 타입
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<class UBonfireTeleportUI> TeleportUIClass;
-
-	UPROPERTY(EditAnywhere, Category = "UI")
-	class UBonfireTeleportUI* TeleportUI;
-
-	ADogCharacter* Player;
 	// 나중에 고치기
+	UPROPERTY(EditAnywhere, Category = "Controller")
 	APlayerController* PlayerController;
+
+	UPROPERTY()
+	UUIManager* UIManager;
 
 private:
 	// 화톳불 위치 등록 -> 화톳불과 상호작용을 해야 ID가 등록됨.
 	void RegisterBonfireLocation();
-	// UI
-	void ShowBonfireUI();
-	void HideBonfireUI();
 
 public:
 	// 화톳불 위치 데이터
@@ -91,16 +76,6 @@ public:
 	// 화톳불 상화작용                   
 	UFUNCTION()
 	void Interact();
-
-	// UI 버튼과 연결된 함수들.
-	UFUNCTION()
-	void OnRest();
-
-	UFUNCTION()
-	void OnTeleport();
-
-	UFUNCTION()
-	void OnLeave();
 
 	// 디버깅 용 함수
 	void ShowMessage(FString Message);

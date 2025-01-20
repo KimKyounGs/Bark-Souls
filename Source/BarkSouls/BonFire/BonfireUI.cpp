@@ -27,17 +27,23 @@ void UBonfireUI::NativeConstruct()
 void UBonfireUI::OnRestButtonClicked()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Rest button clicked!"));
-	bonfire->OnRest();
 }
 
 void UBonfireUI::OnTeleportButtonClicked()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Teleport button clicked!"));
-	bonfire->OnTeleport();
+	if (UIManager)
+	{
+		// BonfireTeleportUI Ç¥½Ã
+		UIManager->ShowUI(EUIType::BonfireTeleportUI);
+	}
 }
 
 void UBonfireUI::OnLeaveButtonClikced()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Leave button clicked!"));
-	bonfire->OnLeave();
+	if (UIManager)
+	{
+		UIManager->HideUI();
+	}
 }

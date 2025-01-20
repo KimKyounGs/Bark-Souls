@@ -28,10 +28,6 @@ protected:
     UPROPERTY(meta = (BindWidget))
     class UScrollBox* BonfireList;
 
-    // 레벨별 화톳불 데이터 (고정된 데이터)
-    TMap<FName, TArray<FBonfireData>> LevelBonfireMap;
-
-    TMap<UButton*, FName> ButtonToBonfireIDMap;
 
 public:
     // UI 초기화 함수
@@ -47,15 +43,4 @@ public:
     UFUNCTION()
     void OnStage3ButtonClicked();
 
-    // 화톳불 버튼 클릭 함수
-    UFUNCTION()
-    void OnBonfireButtonClicked();
-
-
-protected:
-    // 특정 Stage에 따라 화톳불 목록 갱신
-    void PopulateBonfireList(const TArray<FBonfireData>& Bonfires);
-
-    // 특정 Bonfire로 이동
-    void TeleportToBonfire(FName BonfireID);
 };
