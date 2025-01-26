@@ -5,6 +5,7 @@
 #include "BonfireUI.h"
 #include "BonfireTeleportUI.h"
 #include "Blueprint/UserWidget.h"
+#include "BarkSouls/Character/DogCharacterController.h"
 
 // 정적 변수 초기화
 TMap<FName, FBonfireData> ABonfire::StaticActiveBonfires;
@@ -45,12 +46,14 @@ void ABonfire::BeginPlay()
 void ABonfire::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	ShowMessage(TEXT("Tick1"));
 	// 플레이어가 범위 내에 있고 상호작용 키 입력이 있을 경우
 	if (bPlayerInRange)
 	{
 		if (PlayerController && PlayerController->WasInputKeyJustPressed(EKeys::E))
 		{
-			Interact();
+			ShowMessage(TEXT("Tick3"));
+			Interact();  
 		}
 	}
 }
@@ -88,10 +91,15 @@ void ABonfire::Interact()
 		ShowMessage(TEXT("already Bonfire activated"));
 	}
 
-	if (UIManager)
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
 	{
-		// Bonfire UI를 열기
-		UIManager->ShowUI(EUIType::BonfireUI);
+		if (ADogCharacterController* MyPC = Cast<ADogCharacterController>(PC))
+		{
+			if (AUIManager* UIManager = MyPC->GetUIManager())
+			{
+				UIManager->ShowUI(EUIType::BonfireUI);
+			}
+		}
 	}
 }
 

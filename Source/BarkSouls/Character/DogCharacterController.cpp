@@ -2,27 +2,31 @@
 
 
 #include "DogCharacterController.h"
+#include "Kismet/GameplayStatics.h"
 
 void ADogCharacterController::BeginPlay()
 {
     Super::BeginPlay();
 
-    // UIManager 생성
-    if (UIManagerClass)
+    if (UIManager)
     {
-        UIManager = NewObject<UUIManager>(this, UIManagerClass);
+        UE_LOG(LogTemp, Log, TEXT("UIManager successfully found and set."));
+    }
+
+    // UIManager 가져오기
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUIManager::StaticClass(), FoundActors);
+
+    if (FoundActors.Num() > 0)
+    {
+        UIManager = Cast<AUIManager>(FoundActors[0]);
         if (UIManager)
         {
-            UIManager->Initialize(this); // 초기화
-            UE_LOG(LogTemp, Log, TEXT("UIManager initialized successfully."));
-        }
-        else
-        {
-            UE_LOG(LogTemp, Error, TEXT("Failed to create UIManager!"));
+            UE_LOG(LogTemp, Log, TEXT("UIManager successfully found and set."));
         }
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("UIManagerClass is not set in PlayerController!"));
+        UE_LOG(LogTemp, Error, TEXT("No UIManager found in the level!"));
     }
 }

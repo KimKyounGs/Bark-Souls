@@ -19,15 +19,9 @@ protected:
     virtual void BeginPlay() override;
 
 private:
-    // UIManager 참조
-    UPROPERTY()
-    UUIManager* UIManager;
-
-    // 에디터에서 설정 가능한 UIManager 클래스
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess = "true"))
-    TSubclassOf<UUIManager> UIManagerClass;
 
 public:
-    // UIManager getter
-    UUIManager* GetUIManager() const { return UIManager; }
+    UPROPERTY(EditAnywhere)
+    AUIManager* UIManager;
+    AUIManager* GetUIManager() const { return UIManager; }
 };

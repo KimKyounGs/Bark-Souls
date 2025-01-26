@@ -1,9 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "GameFramework/Actor.h"
 #include "Blueprint/UserWidget.h"
 #include "UIManager.generated.h"
 
@@ -20,15 +18,16 @@ enum class EUIType : uint8
 };
 
 /**
- * UIManager : UI를 중앙에서 관리하는 클래스
+ * UIManager : UI를 중앙에서 관리하는 액터
  */
 UCLASS()
-class BARKSOULS_API UUIManager : public UObject
+class BARKSOULS_API AUIManager : public AActor
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
+
 private:
     // 현재 활성화된 UI
-    UPROPERTY(EditAnywhere)
+    UPROPERTY()
     UUserWidget* CurrentUI;
 
     // 모든 UI를 관리하는 TMap
@@ -39,16 +38,20 @@ private:
     UPROPERTY()
     class APlayerController* PlayerController;
 
-
 public:
     // 에디터에서 설정 가능한 UI 클래스 맵
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TMap<EUIType, TSubclassOf<UUserWidget>> UIClassMap;
 
-    // Initialize 함수
-    void Initialize(APlayerController* InPlayerController);
+    // 생성자
+    AUIManager();
 
-    // UI 상태 전환
+protected:
+    // 액터의 생명주기 함수 (초기화)
+    virtual void BeginPlay() override;
+
+public:
+    // 특정 UI 활성화
     void ShowUI(EUIType UIType);
 
     // 현재 활성화된 UI 숨기기
@@ -56,5 +59,4 @@ public:
 
     // 현재 UI 가져오기
     UUserWidget* GetCurrentUI() const { return CurrentUI; }
-
 };

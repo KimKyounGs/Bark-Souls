@@ -25,7 +25,7 @@ private:
 	class UButton* LeaveButton;
 
 	UPROPERTY()
-	UUIManager* UIManager;
+	AUIManager* UIManager;
 
 protected:
 	virtual void NativeConstruct() override; // 위젯 생성 시 초기화 하는 함수.

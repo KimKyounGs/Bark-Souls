@@ -62,9 +62,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Controller")
 	APlayerController* PlayerController;
 
-	UPROPERTY()
-	UUIManager* UIManager;
-
 private:
 	// 화톳불 위치 등록 -> 화톳불과 상호작용을 해야 ID가 등록됨.
 	void RegisterBonfireLocation();
