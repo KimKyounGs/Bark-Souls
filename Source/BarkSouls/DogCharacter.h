@@ -59,6 +59,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
 	class UAnimMontage* RollingMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
+	class UAnimMontage* ParryMontage;
+
 	void PressAtk(float inputValue);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Attack")
@@ -119,7 +122,7 @@ protected:
 	UFUNCTION()
 	void DisableAttackHitBox();
 
-	//데미지 시스템 :: 미구현 
+	//데미지 시스템
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 

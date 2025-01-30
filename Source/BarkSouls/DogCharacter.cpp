@@ -155,21 +155,19 @@ void ADogCharacter::EnhancedInputWalkReleased(const FInputActionValue& Value){
 }
 void ADogCharacter::EnhancedInputRunAndRoll(const FInputActionValue& Value){
 	FVector CurrentVelocity = GetVelocity(); //ACharacter 함수
-	// UE_LOG(LogTemp, Display, TEXT("Velocity: %s"), *CurrentVelocity.ToString());
-	// UE_LOG(LogTemp, Display, TEXT("Speed: %f"), CurrentVelocity.Size()); //정상적으로 0 출력됨 문제 확인해 볼 것
 
 	if(CharacterState == EState::Ready || CharacterState == EState::Walk){ //구르기
 		UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
 		if(animInstance->IsAnyMontagePlaying()){
-			return; // 이미 공격중에는 연속 입력이 안되기 위함 
+			return; // 다른 행동 중에 입력 불가능 
 		}
 		SetCharacterState(EState::Roll);
-		if(CurrentVelocity.Size()){
-			LaunchCharacter(CurrentVelocity*5, false, false);
+		if(CurrentVelocity.Size()){ // 움직이는 중이라 속도가 있으면 
+			LaunchCharacter(CurrentVelocity*5, false, false); // 해당 방향으로 캐릭터 이동 
 			animInstance->Montage_Play(RollingMontage);
 		}
-		else { //제자리에서 깡총깡총
-			FVector ReverseDirection = -GetActorForwardVector();
+		else { 
+			FVector ReverseDirection = -GetActorForwardVector(); // 해당 캐릭터 반대 방향으로 
 			LaunchCharacter(ReverseDirection*600, true, false);
 		}
 		SetCharacterState(EState::Run);
@@ -221,9 +219,13 @@ void ADogCharacter::PressAtk(float inputValue)
 }
 
 void ADogCharacter::EnhancedInputParry(const FInputActionValue& Value){
+	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+	if(animInstance->IsAnyMontagePlaying() || Stamina >= 20.f){ 
+		return; // 다른 행동 중에 입력 불가능  
+	}
+	animInstance->Montage_Play(ParryMontage); // 패리 모션 출력 
 	SetCharacterState(EState::Parry);
-	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADogCharacter::ParryEnd, 0.3f, false);
-	//패링 성공시 코드 추가  
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADogCharacter::ParryEnd, 0.3f, false); // 패리 모션은 0.3초보다 길어야 함 
 }
 
 void ADogCharacter::ParryEnd(){
@@ -231,10 +233,23 @@ void ADogCharacter::ParryEnd(){
 }
 
 float ADogCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser){
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	if(CharacterState == EState::Parry){ // 패링을 성공했을 때
+		// 데미지를 입지 않음
+		// 스테미나를 돌려받는가? 
+		// 그로기 상태 빠지게 하는 방법
+			// 몬스터쪽 TakeDamage에서 구분할 수 있을까?
+			// const UDamageType* DamageType = DamageEvent.DamageTypeClass->GetDefaultObject<UDamageType>();
+			// 해당 코드 잘 활용해 보기 
+			// DamageType 클래스를 만들 필요가 있어보인다
+
+
+		return 1.0f;
+	}
+	// 그냥 맞았을 때 
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser); 
 	Health -= ActualDamage;
 
-	if(Health <= 0.0f){
+	if(Health <= 0.0f){ // 체력이 0 이하로 떨어지면 죽음 
 		SetCharacterState(EState::Dead);
 	}
 
