@@ -1,39 +1,66 @@
-#include "BonfireTeleportUI.h"
-#include "Components/Button.h"
-#include "Components/ScrollBox.h"
-#include "Components/TextBlock.h"
+﻿#include "BonfireTeleportUI.h"
+#include "Components/VerticalBox.h"
 #include "Kismet/GameplayStatics.h"
 
-void UBonfireTeleportUI::InitializeUI(const TMap<FName, FBonfireData>& InActiveBonfires)
+void UBonfireTeleportUI::NativeConstruct()
 {
-    // Stage ��ư Ŭ�� �̺�Ʈ ����
-    if (Stage1Button)
-    {
-        Stage1Button->OnClicked.AddDynamic(this, &UBonfireTeleportUI::OnStage1ButtonClicked);
-    }
+    Super::NativeConstruct();
 
-    if (Stage2Button)
-    {
-        Stage2Button->OnClicked.AddDynamic(this, &UBonfireTeleportUI::OnStage2ButtonClicked);
-    }
+    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+    DogController = Cast<ADogCharacterController>(PlayerController);
 
-    if (Stage3Button)
+    // Stage 버튼 이벤트 바인딩
+    if (Stage1Button) Stage1Button->OnClicked.AddDynamic(this, &UBonfireTeleportUI::OnStageButtonClicked);
+    if (Stage2Button) Stage2Button->OnClicked.AddDynamic(this, &UBonfireTeleportUI::OnStageButtonClicked);
+    if (Stage3Button) Stage3Button->OnClicked.AddDynamic(this, &UBonfireTeleportUI::OnStageButtonClicked);
+    if (BackButton) BackButton->OnClicked.AddDynamic(this, &UBonfireTeleportUI::OnBackButtonClicked);
+
+    CurrentStage = "";
+}
+
+
+void UBonfireTeleportUI::OnStageButtonClicked()
+{   
+    UButton* NewButton = NewObject<UButton>(this, UButton::StaticClass()); 
+
+    if (NewButton)
     {
-        Stage3Button->OnClicked.AddDynamic(this, &UBonfireTeleportUI::OnStage3ButtonClicked);
+        NewButton->SetVisibility(ESlateVisibility::Visible);
+
+        NewButton->OnClicked.AddDynamic(this, &UBonfireTeleportUI::OnBackButtonClicked);
+
+        UTextBlock* ButtonText = NewObject<UTextBlock>(this);
+        ButtonText->SetText(FText::FromString(TEXT("New Button")));
+        ButtonText->SetJustification(ETextJustify::Center);
+
+        // 버튼에 텍스트를 추가하려면 UButton 자체로는 안 되고, UWidget을 추가해야 함.
+        UVerticalBox* ButtonContainer = NewObject<UVerticalBox>(this);
+        ButtonContainer->AddChildToVerticalBox(ButtonText);
+        NewButton->AddChild(ButtonContainer);
+
+        // ScrollBox에 버튼 추가
+        BonfireList->AddChild(NewButton);
     }
 }
 
-void UBonfireTeleportUI::OnStage1ButtonClicked()
+void UBonfireTeleportUI::PopulateBonfireList(FName StageName)
 {
-    return;
+    CurrentStage = StageName;
 }
 
-void UBonfireTeleportUI::OnStage2ButtonClicked()
+void UBonfireTeleportUI::TeleportToBonfire(FName BonfireID)
 {
-    return;
+
 }
 
-void UBonfireTeleportUI::OnStage3ButtonClicked()
+void UBonfireTeleportUI::OnBackButtonClicked()
 {
-    return;
+    if (DogController)
+    {
+        AUIManager* UIManager = DogController->GetUIManager();
+        if (UIManager)
+        {
+            UIManager->ShowUI(EUIType::BonfireUI);
+        }
+    }
 }

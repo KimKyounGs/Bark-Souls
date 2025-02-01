@@ -68,12 +68,14 @@ void AUIManager::ShowUI(EUIType UIType)
         UUserWidget* TargetUI = UIMap[UIType];
         if (TargetUI)
         {
+            UE_LOG(LogTemp, Log, TEXT("Yes TargetUI"));
             TargetUI->SetVisibility(ESlateVisibility::Visible);
             CurrentUI = TargetUI;
 
             // 마우스 커서 활성화 및 입력 모드 전환
             if (PlayerController)
             {
+                UE_LOG(LogTemp, Log, TEXT("Yes PlayerController"));
                 PlayerController->bShowMouseCursor = true;
 
                 FInputModeUIOnly InputMode;

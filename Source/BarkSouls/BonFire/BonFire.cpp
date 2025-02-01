@@ -46,13 +46,11 @@ void ABonfire::BeginPlay()
 void ABonfire::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	ShowMessage(TEXT("Tick1"));
 	// 플레이어가 범위 내에 있고 상호작용 키 입력이 있을 경우
 	if (bPlayerInRange)
 	{
 		if (PlayerController && PlayerController->WasInputKeyJustPressed(EKeys::E))
 		{
-			ShowMessage(TEXT("Tick3"));
 			Interact();  
 		}
 	}
@@ -79,7 +77,6 @@ void ABonfire::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 
 void ABonfire::Interact()
 {
-
 	if (!BonfireData.bIsActivated) // 아직 등록되지 않은 경우
 	{
 		RegisterBonfireLocation();
@@ -91,11 +88,11 @@ void ABonfire::Interact()
 		ShowMessage(TEXT("already Bonfire activated"));
 	}
 
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
+	if (APlayerController* Controller = UGameplayStatics::GetPlayerController(this, 0))
 	{
-		if (ADogCharacterController* MyPC = Cast<ADogCharacterController>(PC))
+		if (ADogCharacterController* ADogController = Cast<ADogCharacterController>(Controller))
 		{
-			if (AUIManager* UIManager = MyPC->GetUIManager())
+			if (AUIManager* UIManager = ADogController->GetUIManager())
 			{
 				UIManager->ShowUI(EUIType::BonfireUI);
 			}

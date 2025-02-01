@@ -3,6 +3,7 @@
 
 #include "BonfireUI.h"
 #include "Components/Button.h"
+#include "Kismet/GameplayStatics.h"
 
 void UBonfireUI::NativeConstruct()
 {
@@ -22,28 +23,33 @@ void UBonfireUI::NativeConstruct()
 	{
 		LeaveButton->OnClicked.AddDynamic(this, &UBonfireUI::OnLeaveButtonClikced);
 	}
+
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	DogController = Cast<ADogCharacterController>(PlayerController);
 }
 
 void UBonfireUI::OnRestButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Rest button clicked!"));
+
 }
 
 void UBonfireUI::OnTeleportButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Teleport button clicked!"));
-	if (UIManager)
+	if (DogController)
 	{
-		// BonfireTeleportUI Ç¥½Ã
-		UIManager->ShowUI(EUIType::BonfireTeleportUI);
+		AUIManager* UIManager = DogController->GetUIManager();
+		if (UIManager)
+		{
+			UIManager->ShowUI(EUIType::BonfireTeleportUI);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No DogController"));
 	}
 }
 
 void UBonfireUI::OnLeaveButtonClikced()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Leave button clicked!"));
-	if (UIManager)
-	{
-		UIManager->HideUI();
-	}
 }

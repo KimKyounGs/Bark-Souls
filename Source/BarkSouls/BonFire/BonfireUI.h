@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "UIManager.h"
+#include "BarkSouls/Character/DogCharacterController.h"
 #include "BonfireUI.generated.h"
 
 /**
@@ -25,7 +25,7 @@ private:
 	class UButton* LeaveButton;
 
 	UPROPERTY()
-	AUIManager* UIManager;
+	ADogCharacterController* DogController;
 
 protected:
 	virtual void NativeConstruct() override; // 위젯 생성 시 초기화 하는 함수.
