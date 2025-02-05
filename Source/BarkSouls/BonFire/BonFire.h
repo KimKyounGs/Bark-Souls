@@ -7,7 +7,6 @@
 #include "Components/BoxComponent.h"
 #include "MapResetComponent.h"
 #include "BonfireTypes.h"
-#include "UIManager.h"
 #include "Bonfire.generated.h"
 
 UCLASS()

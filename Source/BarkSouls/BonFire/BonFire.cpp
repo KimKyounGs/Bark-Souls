@@ -3,7 +3,6 @@
 #include "Bonfire.h"
 #include "Kismet/GameplayStatics.h"
 #include "BonfireUI.h"
-#include "BonfireTeleportUI.h"
 #include "Blueprint/UserWidget.h"
 #include "BarkSouls/Character/DogCharacterController.h"
 
@@ -23,7 +22,6 @@ ABonfire::ABonfire() : bPlayerInRange(false), bUsingBonfire(false)
 	MapResetComponent = CreateDefaultSubobject<UMapResetComponent>(TEXT("MapResetComponet"));
 
 	BonfireData.bIsActivated = false;
-
 }
 
 void ABonfire::BeginPlay()
@@ -88,14 +86,11 @@ void ABonfire::Interact()
 		ShowMessage(TEXT("already Bonfire activated"));
 	}
 
-	if (APlayerController* Controller = UGameplayStatics::GetPlayerController(this, 0))
+	if (ADogCharacterController* ADogController = Cast<ADogCharacterController>(PlayerController))
 	{
-		if (ADogCharacterController* ADogController = Cast<ADogCharacterController>(Controller))
+		if (AUIManager* UIManager = ADogController->GetUIManager())
 		{
-			if (AUIManager* UIManager = ADogController->GetUIManager())
-			{
-				UIManager->ShowUI(EUIType::BonfireUI);
-			}
+			UIManager->ShowUI(EUIType::BonfireUI);
 		}
 	}
 }

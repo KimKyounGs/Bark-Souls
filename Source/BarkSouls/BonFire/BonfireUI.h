@@ -24,8 +24,7 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* LeaveButton;
 
-	UPROPERTY()
-	ADogCharacterController* DogController;
+	class AUIManager* UIManager;
 
 protected:
 	virtual void NativeConstruct() override; // 위젯 생성 시 초기화 하는 함수.

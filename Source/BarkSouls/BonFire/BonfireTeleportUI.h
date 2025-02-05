@@ -8,7 +8,6 @@
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "BonfireTypes.h"
-#include "BarkSouls/Character/DogCharacterController.h" // 기존 컨트롤러 포함
 #include "BonfireTeleportUI.generated.h"
 
 UCLASS()
@@ -41,13 +40,15 @@ private:
     // 현재 선택된 Stage
     FName CurrentStage;
 
+    TMap<UButton*, FName> ButtonStageMap;
+
     // Stage별 화톳불 데이터
     TMap<FName, TArray<FBonfireData>> BonfireMap;
 
-    // 버튼과 화톳불 ID 매핑
-    TMap<UButton*, FName> ButtonToBonfireIDMap;
+    TArray<FBonfireData> Stage1Array;
+    TArray<FBonfireData> Stage2Array;
 
-    class ADogCharacterController* DogController;
+    class AUIManager* UIManager;
 
 public:
     // Stage 버튼 클릭 이벤트
@@ -62,4 +63,7 @@ public:
 
     // 특정 Bonfire로 이동
     void TeleportToBonfire(FName BonfireID);
+
+    // 화톳불 데이터 저장.
+    // void ReserveBonfire();
 };
