@@ -4,9 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Button.h"
-#include "Components/ScrollBox.h"
-#include "Components/TextBlock.h"
 #include "BonfireTypes.h"
 #include "BonfireTeleportUI.generated.h"
 
@@ -31,7 +28,10 @@ private:
 
     // 화톳불 버튼 목록 표시
     UPROPERTY(meta = (BindWidget))
-    class UScrollBox* BonfireList;
+    class UScrollBox* BonfireScrollBox; 
+
+    UPROPERTY(meta = (BindWidget))
+    class UWrapBox* BonfireWrapBox;  
 
     // 돌아가기 버튼
     UPROPERTY(meta = (BindWidget))
@@ -42,11 +42,8 @@ private:
 
     TMap<UButton*, FName> ButtonStageMap;
 
-    // Stage별 화톳불 데이터
-    TMap<FName, TArray<FBonfireData>> BonfireMap;
 
-    TArray<FBonfireData> Stage1Array;
-    TArray<FBonfireData> Stage2Array;
+    TMap<UButton*, FName> ButtonBonfireMap;
 
     class AUIManager* UIManager;
 
@@ -61,6 +58,10 @@ public:
     // 특정 Stage의 화톳불 목록을 UI에 표시
     void PopulateBonfireList(FName StageName);
 
+    UFUNCTION()
+    void OnAnyBonfireButtonClicked();
+
+    UFUNCTION()
     // 특정 Bonfire로 이동
     void TeleportToBonfire(FName BonfireID);
 

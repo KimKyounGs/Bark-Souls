@@ -31,11 +31,7 @@ void ABonfire::BeginPlay()
 	// 컨트롤러 초기화.
 	PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 	
-	// 월드 정보나 다른 액터에 의존한 위치 초기화
-	if (!BonfireData.BonfireTransform.IsValid())
-	{
-		BonfireData.BonfireTransform = GetActorTransform(); // 현재 액터의 Transform으로 초기화
-	}
+	BonfireData.BonfireTransform = GetActorTransform(); // 현재 액터의 Transform으로 초기화
 
 	InteractionBox->OnComponentBeginOverlap.AddDynamic(this, &ABonfire::OnOverlapBegin);
 	InteractionBox->OnComponentEndOverlap.AddDynamic(this, &ABonfire::OnOverlapEnd);
