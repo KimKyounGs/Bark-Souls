@@ -171,6 +171,7 @@ void UBonfireTeleportUI::TeleportToBonfire(FName BonfireID)
 	{
 		// 다른 레벨이면 해당 레벨로 이동
 		UGameplayStatics::OpenLevel(GetWorld(), Bonfire.LevelName);
+		// PlayerCharacter->SetActorLocation(Bonfire.BonfireTransform.GetLocation());
 		UE_LOG(LogTemp, Warning, TEXT("Loading Level: %s"), *Bonfire.LevelName.ToString());
 	}
 }

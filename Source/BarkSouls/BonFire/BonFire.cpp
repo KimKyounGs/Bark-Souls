@@ -31,7 +31,11 @@ void ABonfire::BeginPlay()
 	// 컨트롤러 초기화.
 	PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 	
-	BonfireData.BonfireTransform = GetActorTransform(); // 현재 액터의 Transform으로 초기화
+	// 위치 저장
+	FTransform BonfireTransform = GetActorTransform(); 
+	FVector NewLocation = BonfireTransform.GetLocation() + FVector(0, 0, 100);
+	BonfireData.BonfireTransform.SetLocation(NewLocation);
+	BonfireData.BonfireTransform = BonfireTransform;
 
 	InteractionBox->OnComponentBeginOverlap.AddDynamic(this, &ABonfire::OnOverlapBegin);
 	InteractionBox->OnComponentEndOverlap.AddDynamic(this, &ABonfire::OnOverlapEnd);
@@ -48,6 +52,7 @@ void ABonfire::Tick(float DeltaTime)
 			Interact();  
 		}
 	}
+
 }
 
 void ABonfire::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
