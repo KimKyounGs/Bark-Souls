@@ -9,11 +9,14 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 #include "UIManager.h"
-#include "Bonfire.h"
+#include "BarkSouls/BarkSoulsGameInstance.h"
+
 
 void UBonfireTeleportUI::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	GameInstance = Cast<UBarkSoulsGameInstance>(UGameplayStatics::GetGameInstance(this));
 
 	// Stage 버튼 이벤트 바인딩
 	if (Stage1Button)
@@ -49,7 +52,6 @@ void UBonfireTeleportUI::OnStageButtonClicked()
 		if (Pair.Key->HasKeyboardFocus())  // 현재 키보드 포커스를 가진 버튼 찾기
 		{
 			ClickedButton = Pair.Key;
-			UE_LOG(LogTemp, Warning, TEXT("Button Clicked: %s"), *Pair.Value.ToString());
 			break;
 		}
 	}
@@ -57,7 +59,6 @@ void UBonfireTeleportUI::OnStageButtonClicked()
 	// 버튼이 존재하면 해당 `StageName`을 찾아 실행
 	if (ClickedButton && ButtonStageMap.Contains(ClickedButton))
 	{
-		UE_LOG(LogTemp, Warning, TEXT(" PopulateBonfireList "));
 		FName StageName = ButtonStageMap[ClickedButton];
 		PopulateBonfireList(StageName);
 	}
@@ -66,14 +67,13 @@ void UBonfireTeleportUI::OnStageButtonClicked()
 void UBonfireTeleportUI::PopulateBonfireList(FName StageName)
 {
 	CurrentStage = StageName;
-	UE_LOG(LogTemp, Warning, TEXT("Stage Name: %s"), *StageName.ToString());
 
 	if (!BonfireScrollBox || !BonfireWrapBox) return;
 
 	// 기존 버튼 삭제
 	BonfireWrapBox->ClearChildren();
 
-	for (const TPair<FName, FBonfireData>& Pair : ABonfire::StaticActiveBonfires)
+	for (const TPair<FName, FBonfireData>& Pair : GameInstance->BonfireMap)
 	{
 		const FBonfireData& Bonfire = Pair.Value;
 		// 현재 스테이지와 일치하는 화톳불만 추가
@@ -148,31 +148,28 @@ void UBonfireTeleportUI::OnAnyBonfireButtonClicked()
 
 void UBonfireTeleportUI::TeleportToBonfire(FName BonfireID)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Teleported 1"));
-	if (!ABonfire::StaticActiveBonfires.Contains(BonfireID)) return;
-	UE_LOG(LogTemp, Warning, TEXT("Teleported 2"));
+	if (!GameInstance->BonfireMap.Contains(BonfireID)) return;
 
-	const FBonfireData& Bonfire = ABonfire::StaticActiveBonfires[BonfireID];
+	const FBonfireData& Bonfire = GameInstance->BonfireMap[BonfireID];
 
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (!PlayerController) return;
 
 	ACharacter* PlayerCharacter = Cast<ACharacter>(PlayerController->GetPawn());
 	if (!PlayerCharacter) return;
-	UE_LOG(LogTemp, Warning, TEXT("Teleported ~"));
 	// 같은 레벨이면 위치 이동, 다른 레벨이면 레벨 변경
 	if (Bonfire.LevelName == UGameplayStatics::GetCurrentLevelName(GetWorld()))
 	{
+		UIManager->HideUI();
 		// 같은 레벨이면 위치 이동
 		PlayerCharacter->SetActorLocation(Bonfire.BonfireTransform.GetLocation());
-		UE_LOG(LogTemp, Warning, TEXT("Teleported to: %s"), *Bonfire.BonfireName.ToString());
 	}
 	else
 	{
-		// 다른 레벨이면 해당 레벨로 이동
+		// 다른 레벨이면 이동할 화톳불 정보 저장 후 레벨 변경
+		GameInstance->SetSelectedBonfire(BonfireID);
+		UIManager->HideUI();
 		UGameplayStatics::OpenLevel(GetWorld(), Bonfire.LevelName);
-		// PlayerCharacter->SetActorLocation(Bonfire.BonfireTransform.GetLocation());
-		UE_LOG(LogTemp, Warning, TEXT("Loading Level: %s"), *Bonfire.LevelName.ToString());
 	}
 }
 

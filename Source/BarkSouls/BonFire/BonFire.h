@@ -62,12 +62,9 @@ private:
 	APlayerController* PlayerController;
 
 private:
-	// 화톳불 위치 등록 -> 화톳불과 상호작용을 해야 ID가 등록됨.
-	void RegisterBonfireLocation();
+
 
 public:
-	// 화톳불 위치 데이터
-	static TMap<FName, FBonfireData> StaticActiveBonfires;
 
 	// 화톳불 상화작용                   
 	UFUNCTION()

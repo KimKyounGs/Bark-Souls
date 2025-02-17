@@ -42,10 +42,11 @@ private:
 
     TMap<UButton*, FName> ButtonStageMap;
 
-
     TMap<UButton*, FName> ButtonBonfireMap;
 
     class AUIManager* UIManager;
+
+    class UBarkSoulsGameInstance* GameInstance;
 
 public:
     // Stage 버튼 클릭 이벤트

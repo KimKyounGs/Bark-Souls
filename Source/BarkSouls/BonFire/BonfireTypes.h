@@ -28,4 +28,10 @@ struct FBonfireData
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bonfire")
     UTexture2D* BonfireTexture; // 화톳불 이미지
 
+
+    FBonfireData()
+        : BonfireName(NAME_None),
+          BonfireTransform(FTransform::Identity),
+          bIsActivated(false)
+    {}
 };

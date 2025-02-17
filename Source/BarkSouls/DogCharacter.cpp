@@ -9,7 +9,7 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DB.h"
-
+#include "BarkSoulsGameInstance.h"
 #include "DogCharacter.h"
 
 // Sets default values
@@ -96,6 +96,14 @@ void ADogCharacter::BeginPlay()
 	}
 	//HitBox Overlap Event Bind
 	AttackHitBox->OnComponentBeginOverlap.AddDynamic(this, &ADogCharacter::OnAttackHitBoxBeginOverlap);
+
+	UBarkSoulsGameInstance* GameInstance = Cast<UBarkSoulsGameInstance>(UGameplayStatics::GetGameInstance(this));
+	if (!GameInstance) return;
+
+	if (GameInstance->SelectedBonfire.IsNone()) return;
+
+	FTransform BonfireTransform = GameInstance->GetBonfireTransform(GameInstance->SelectedBonfire);
+	SetActorTransform(BonfireTransform);
 }
 
 // Called every frame
@@ -119,6 +127,7 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
+
 	if(EnhancedInputComponent != nullptr){
 		EnhancedInputComponent->BindAction(InputToMove, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputMove);
 		EnhancedInputComponent->BindAction(InputToMove, ETriggerEvent::Completed, this, &ADogCharacter::EnhancedInputWalkReleased);
@@ -126,6 +135,10 @@ void ADogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(InputToRunAndRoll, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputRunAndRoll);
 		EnhancedInputComponent->BindAction(InputToRunAndRoll, ETriggerEvent::Completed, this, &ADogCharacter::EnhancedInputRunReleased);
 		EnhancedInputComponent->BindAction(InputToFight, ETriggerEvent::Triggered, this, &ADogCharacter::EnhancedInputFight);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("❌ EnhancedInputComponent NOT found!"));
 	}
 }
 

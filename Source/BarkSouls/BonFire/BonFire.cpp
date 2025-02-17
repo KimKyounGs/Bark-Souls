@@ -5,9 +5,7 @@
 #include "BonfireUI.h"
 #include "Blueprint/UserWidget.h"
 #include "BarkSouls/Character/DogCharacterController.h"
-
-// 정적 변수 초기화
-TMap<FName, FBonfireData> ABonfire::StaticActiveBonfires;
+#include "BarkSouls/BarkSoulsGameInstance.h"
 
 ABonfire::ABonfire() : bPlayerInRange(false), bUsingBonfire(false)
 {
@@ -30,12 +28,6 @@ void ABonfire::BeginPlay()
 
 	// 컨트롤러 초기화.
 	PlayerController = UGameplayStatics::GetPlayerController(this, 0);
-	
-	// 위치 저장
-	FTransform BonfireTransform = GetActorTransform(); 
-	FVector NewLocation = BonfireTransform.GetLocation() + FVector(0, 0, 100);
-	BonfireData.BonfireTransform.SetLocation(NewLocation);
-	BonfireData.BonfireTransform = BonfireTransform;
 
 	InteractionBox->OnComponentBeginOverlap.AddDynamic(this, &ABonfire::OnOverlapBegin);
 	InteractionBox->OnComponentEndOverlap.AddDynamic(this, &ABonfire::OnOverlapEnd);
@@ -78,7 +70,12 @@ void ABonfire::Interact()
 {
 	if (!BonfireData.bIsActivated) // 아직 등록되지 않은 경우
 	{
-		RegisterBonfireLocation();
+		UBarkSoulsGameInstance* GameInstance = Cast<UBarkSoulsGameInstance>(UGameplayStatics::GetGameInstance(this));
+		if (GameInstance)
+		{
+			BonfireData.BonfireTransform = GetActorTransform();
+			GameInstance->RegisterBonfire(BonfireData);
+		}
 		BonfireData.bIsActivated = true; // 등록 상태로 변경
 		ShowMessage(TEXT("Bonfire activate"));
 	}
@@ -93,14 +90,6 @@ void ABonfire::Interact()
 		{
 			UIManager->ShowUI(EUIType::BonfireUI);
 		}
-	}
-}
-
-void ABonfire::RegisterBonfireLocation()
-{
-	if (!BonfireData.BonfireID.IsNone())
-	{
-		StaticActiveBonfires.Add(BonfireData.BonfireID, BonfireData);
 	}
 }
 
