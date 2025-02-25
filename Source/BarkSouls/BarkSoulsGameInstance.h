@@ -14,6 +14,8 @@ UCLASS()
 class BARKSOULS_API UBarkSoulsGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
+private:
+
 public:
 	virtual void Init() override;
 
@@ -24,10 +26,16 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	FName SelectedBonfire;
 
-	void RegisterBonfire(FBonfireData NewBonfire);
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Fade")
+	bool bShouldFadeIn = false;
 
-	void SetSelectedBonfire(FName BonfireName);
 
-	FTransform GetBonfireTransform(FName BonfireID);
+
+	void RegisterBonfire(FBonfireData NewBonfire); // 화톳불 저장 함수
+
+	void SetSelectedBonfire(FName BonfireName); // 어떤 화톳불이 저장되었는지 확인하는 함수
+
+	FTransform GetBonfireTransform(FName BonfireID); // 화톳불 위치 반환함수
 	
+
 };

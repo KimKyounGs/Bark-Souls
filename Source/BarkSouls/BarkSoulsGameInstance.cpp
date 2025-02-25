@@ -3,9 +3,10 @@
 
 #include "BarkSoulsGameInstance.h"
 
-void UBarkSoulsGameInstance::Init()
+void UBarkSoulsGameInstance::Init() 
 {
 	Super::Init();
+	bShouldFadeIn = false;
 	UE_LOG(LogTemp, Warning, TEXT("GameInstance Initialized - Bonfire Data Ready"));
 }
 

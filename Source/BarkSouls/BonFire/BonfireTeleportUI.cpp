@@ -148,7 +148,7 @@ void UBonfireTeleportUI::OnAnyBonfireButtonClicked()
 
 void UBonfireTeleportUI::TeleportToBonfire(FName BonfireID)
 {
-	if (!GameInstance->BonfireMap.Contains(BonfireID)) return;
+	if (!GameInstance || !GameInstance->BonfireMap.Contains(BonfireID)) return;
 
 	const FBonfireData& Bonfire = GameInstance->BonfireMap[BonfireID];
 
@@ -157,19 +157,46 @@ void UBonfireTeleportUI::TeleportToBonfire(FName BonfireID)
 
 	ACharacter* PlayerCharacter = Cast<ACharacter>(PlayerController->GetPawn());
 	if (!PlayerCharacter) return;
+
+
+	// 1. 화면 페이드 아웃 (1초 동안 어두워짐)
+	if (PlayerController->PlayerCameraManager)
+	{
+		PlayerController->PlayerCameraManager->StartCameraFade(0.0f, 1.0f, 1.0f, FLinearColor::Black, false, true);
+	}
+
 	// 같은 레벨이면 위치 이동, 다른 레벨이면 레벨 변경
 	if (Bonfire.LevelName == UGameplayStatics::GetCurrentLevelName(GetWorld()))
 	{
 		UIManager->HideUI();
-		// 같은 레벨이면 위치 이동
-		PlayerCharacter->SetActorLocation(Bonfire.BonfireTransform.GetLocation());
+		// 2. 1.5초 후 위치 이동
+		FTimerHandle TeleportTimer;
+		GetWorld()->GetTimerManager().SetTimer(TeleportTimer, FTimerDelegate::CreateLambda([this, PlayerCharacter, Bonfire]()
+			{
+				PlayerCharacter->SetActorLocation(Bonfire.BonfireTransform.GetLocation()); // 위치 이동
+
+				// 3. 0.5초 후 페이드 인 (다시 밝아짐)
+				APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+				if (PlayerController && PlayerController->PlayerCameraManager)
+				{
+					PlayerController->PlayerCameraManager->StartCameraFade(1.0f, 0.0f, 0.5f, FLinearColor::Black, false, true);
+				}
+
+			}), 1.5f, false);
 	}
 	else
 	{
-		// 다른 레벨이면 이동할 화톳불 정보 저장 후 레벨 변경
 		GameInstance->SetSelectedBonfire(BonfireID);
 		UIManager->HideUI();
-		UGameplayStatics::OpenLevel(GetWorld(), Bonfire.LevelName);
+
+		GameInstance->bShouldFadeIn = true; // 페이드 인 활성화 저장
+		// 3. 1.5초 후 레벨 변경
+		FTimerHandle LevelChangeTimer;
+		GetWorld()->GetTimerManager().SetTimer(LevelChangeTimer, FTimerDelegate::CreateLambda([this, Bonfire]()
+			{
+				UGameplayStatics::OpenLevel(GetWorld(), Bonfire.LevelName);
+			}), 1.5f, false);
+
 	}
 }
 

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Bonfire.h"
 #include "Kismet/GameplayStatics.h"
@@ -6,6 +6,10 @@
 #include "Blueprint/UserWidget.h"
 #include "BarkSouls/Character/DogCharacterController.h"
 #include "BarkSouls/BarkSoulsGameInstance.h"
+#include "NiagaraComponent.h"
+#include "Sound/SoundBase.h"
+#include "Components/AudioComponent.h"
+#include "TimerManager.h"
 
 ABonfire::ABonfire() : bPlayerInRange(false), bUsingBonfire(false)
 {
@@ -19,6 +23,12 @@ ABonfire::ABonfire() : bPlayerInRange(false), bUsingBonfire(false)
 
 	MapResetComponent = CreateDefaultSubobject<UMapResetComponent>(TEXT("MapResetComponet"));
 
+	BonfireEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BonfireEffect"));
+	BonfireEffect->SetupAttachment(RootComponent);
+
+	BonfireLoopAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("BonfireLoopAudio"));
+	BonfireLoopAudioComponent->SetupAttachment(RootComponent);
+
 	BonfireData.bIsActivated = false;
 }
 
@@ -26,7 +36,7 @@ void ABonfire::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ƒ¡∆Æ∑—∑Ø √ ±‚»≠.
+	// Ïª®Ìä∏Î°§Îü¨ Ï¥àÍ∏∞Ìôî.
 	PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 
 	InteractionBox->OnComponentBeginOverlap.AddDynamic(this, &ABonfire::OnOverlapBegin);
@@ -36,7 +46,7 @@ void ABonfire::BeginPlay()
 void ABonfire::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	// «√∑π¿ÃæÓ∞° π¸¿ß ≥ªø° ¿÷∞Ì ªÛ»£¿€øÎ ≈∞ ¿‘∑¬¿Ã ¿÷¿ª ∞ÊøÏ
+	// ÌîåÎ†àÏù¥Ïñ¥Í∞Ä Î≤îÏúÑ ÎÇ¥Ïóê ÏûàÍ≥† ÏÉÅÌò∏ÏûëÏö© ÌÇ§ ÏûÖÎ†•Ïù¥ ÏûàÏùÑ Í≤ΩÏö∞
 	if (bPlayerInRange)
 	{
 		if (PlayerController && PlayerController->WasInputKeyJustPressed(EKeys::E))
@@ -44,7 +54,6 @@ void ABonfire::Tick(float DeltaTime)
 			Interact();  
 		}
 	}
-
 }
 
 void ABonfire::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -68,7 +77,7 @@ void ABonfire::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 
 void ABonfire::Interact()
 {
-	if (!BonfireData.bIsActivated) // æ∆¡˜ µÓ∑œµ«¡ˆ æ ¿∫ ∞ÊøÏ
+	if (!BonfireData.bIsActivated) // ÏïÑÏßÅ Îì±Î°ùÎêòÏßÄ ÏïäÏùÄ Í≤ΩÏö∞
 	{
 		UBarkSoulsGameInstance* GameInstance = Cast<UBarkSoulsGameInstance>(UGameplayStatics::GetGameInstance(this));
 		if (GameInstance)
@@ -76,7 +85,7 @@ void ABonfire::Interact()
 			BonfireData.BonfireTransform = GetActorTransform();
 			GameInstance->RegisterBonfire(BonfireData);
 		}
-		BonfireData.bIsActivated = true; // µÓ∑œ ªÛ≈¬∑Œ ∫Ø∞Ê
+		BonfireData.bIsActivated = true; // Îì±Î°ù ÏÉÅÌÉúÎ°ú Î≥ÄÍ≤Ω
 		ShowMessage(TEXT("Bonfire activate"));
 	}
 	else
@@ -84,13 +93,38 @@ void ABonfire::Interact()
 		ShowMessage(TEXT("already Bonfire activated"));
 	}
 
-	if (ADogCharacterController* ADogController = Cast<ADogCharacterController>(PlayerController))
+	// ÎÇòÏù¥ÏïÑÍ∞ÄÎùº (Î∂à) ÌôúÏÑ±Ìôî
+	if (BonfireEffect)
 	{
-		if (AUIManager* UIManager = ADogController->GetUIManager())
-		{
-			UIManager->ShowUI(EUIType::BonfireUI);
-		}
+		BonfireEffect->Activate();
 	}
+	// 1. Î∂àÍΩÉ Ï†êÌôî ÏÇ¨Ïö¥Îìú (Ìïú Î≤àÎßå Ïû¨ÏÉù)
+	if (BonfireIgniteSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), BonfireIgniteSound, GetActorLocation());
+	}
+
+	// 2. ÏßÄÏÜçÎêòÎäî Î∂àÍΩÉ ÏÇ¨Ïö¥Îìú (Î∞òÎ≥µ + Ïñ¥ÌÖåÎâ¥ÏóêÏù¥ÏÖò)
+	if (BonfireLoopSound && BonfireLoopAudioComponent)
+	{
+		BonfireLoopAudioComponent->SetSound(BonfireLoopSound);
+		BonfireLoopAudioComponent->bIsUISound = false; 
+		BonfireLoopAudioComponent->bAllowSpatialization = true; // 3D ÏúÑÏπò Í∏∞Î∞ò ÏÇ¨Ïö¥Îìú ÌôúÏÑ±Ìôî
+		BonfireLoopAudioComponent->AttenuationSettings = BonfireSoundAttenuation; // Ïñ¥ÌÖåÎâ¥ÏóêÏù¥ÏÖò Ï†ÅÏö©
+		BonfireLoopAudioComponent->Play();
+	}
+
+	FTimerHandle UITimerHandle;
+	GetWorldTimerManager().SetTimer(UITimerHandle, FTimerDelegate::CreateLambda([this]()
+		{
+			if (ADogCharacterController* ADogController = Cast<ADogCharacterController>(PlayerController))
+			{
+				if (AUIManager* UIManager = ADogController->GetUIManager())
+				{
+					UIManager->ShowUI(EUIType::BonfireUI);
+				}
+			}
+		}), 2.0f, false);
 }
 
 void ABonfire::ShowMessage(FString Message)

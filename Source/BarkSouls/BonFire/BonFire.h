@@ -57,8 +57,23 @@ private:
 	UPROPERTY(EditAnywhere, Category = "State")
 	bool bUsingBonfire;
 
-	// 나중에 고치기
-	UPROPERTY(EditAnywhere, Category = "Controller")
+	// 나이아가라 이팩트
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	class UNiagaraComponent* BonfireEffect; // 불꽃 이펙트
+
+	// 사운드 변수 추가
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* BonfireIgniteSound; // 불꽃 점화 사운드 (한 번만 재생)
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* BonfireLoopSound;   // 지속되는 화톳불 사운드 (반복 재생)
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundAttenuation* BonfireSoundAttenuation; // 어테뉴에이션 설정
+
+	UPROPERTY()
+	class UAudioComponent* BonfireLoopAudioComponent; //반복 재생을 위한 오디오 컴포넌트
+
 	APlayerController* PlayerController;
 
 private:

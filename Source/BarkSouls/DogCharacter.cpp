@@ -97,6 +97,8 @@ void ADogCharacter::BeginPlay()
 	//HitBox Overlap Event Bind
 	AttackHitBox->OnComponentBeginOverlap.AddDynamic(this, &ADogCharacter::OnAttackHitBoxBeginOverlap);
 
+
+	// 화톳불로 다른 레벨 이동시에 적용.
 	UBarkSoulsGameInstance* GameInstance = Cast<UBarkSoulsGameInstance>(UGameplayStatics::GetGameInstance(this));
 	if (!GameInstance) return;
 
@@ -104,6 +106,11 @@ void ADogCharacter::BeginPlay()
 
 	FTransform BonfireTransform = GameInstance->GetBonfireTransform(GameInstance->SelectedBonfire);
 	SetActorTransform(BonfireTransform);
+	GameInstance->bShouldFadeIn = false; // 초기화
+	if (PlayerController->PlayerCameraManager)
+	{
+		PlayerController->PlayerCameraManager->StartCameraFade(1.0f, 0.0f, 1.0f, FLinearColor::Black, false, true);
+	}
 }
 
 // Called every frame
