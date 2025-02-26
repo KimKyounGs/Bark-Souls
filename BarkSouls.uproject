@@ -13,7 +13,9 @@
 				"Engine",
 				"UMG",
 				"UMGEditor",
-				"CoreUObject"
+				"CoreUObject",
+				"Slate",
+				"SlateCore"
 			]
 		}
 	],
