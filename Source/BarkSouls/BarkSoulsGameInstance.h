@@ -37,5 +37,7 @@ public:
 
 	FTransform GetBonfireTransform(FName BonfireID); // 화톳불 위치 반환함수
 	
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	bool bIsMainMenuActive = true; // 메인 메뉴 UI를 다시 생성할지 여부를 저장하는 변수
 
 };
