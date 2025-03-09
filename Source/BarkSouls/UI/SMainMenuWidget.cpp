@@ -138,7 +138,7 @@ FReply SMainMenuWidget::OnStartGameClicked()
 		}
 
 		// 레벨 이동
-		UGameplayStatics::OpenLevel(GEngine->GameViewport->GetWorld(), "TestLevel1");
+		UGameplayStatics::OpenLevel(GEngine->GameViewport->GetWorld(), "TestLevel2");
 	}
 	return FReply::Handled();
 }

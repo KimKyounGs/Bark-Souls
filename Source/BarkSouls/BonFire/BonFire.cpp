@@ -82,7 +82,6 @@ void ABonfire::Interact()
 		UBarkSoulsGameInstance* GameInstance = Cast<UBarkSoulsGameInstance>(UGameplayStatics::GetGameInstance(this));
 		if (GameInstance)
 		{
-			BonfireData.BonfireTransform = GetActorTransform();
 			GameInstance->RegisterBonfire(BonfireData);
 		}
 		BonfireData.bIsActivated = true; // 등록 상태로 변경
